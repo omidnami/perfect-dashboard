@@ -1,0 +1,121 @@
+@import url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css");
+body {
+    font-family: Vazirmatn, sans-serif;
+}
+a,p,input,select,h1,h2,h3,h4,h5,h6,button,label,li,ul,div,section {
+    font-family: Vazirmatn, sans-serif !important;
+}
+h1 {
+    color: gray;
+    font-size: 26px;
+}
+.uix-continer {
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: right;
+    padding-inline-start: 260px;
+}
+
+.menu {
+    position: fixed;
+    height: 100vh;
+    background-color: #1e2026;
+    width: 20vw;
+    border-radius: 45px 0 0 45px;
+    padding: 8px;
+    z-index: 999;
+  }
+
+.menu nav{
+    margin-top: 16px;
+}
+
+.menu nav ul li .css-1kgs6hp-JoyListItemButton-root.Mui-selected{
+    background-color: #33353a !important;
+
+}
+
+button.primary,.btn-primary {
+    background: rgb(26, 24, 24) !important;
+    border: none;
+    outline: none;
+}
+
+button.primary:hover,.btn-primary:hover {
+    background: rgba(26, 24, 24,.8) !important;
+}
+
+.menu nav ul li {
+    margin-top: 12px;
+}
+.menu nav ul li div{
+    color: rgb(188, 187, 187);
+}
+
+.menu nav ul li:hover, .menu nav ul li div:hover {
+    background-color: #33353a !important;
+}
+.menu nav ul li:hover {
+    background-color: rgb(54, 24, 68) !important;
+}
+
+.sub-menu {
+    position: fixed;
+    height: 100vh;
+    background-color: #33353a;
+    width: 20vw;
+    border-radius: 0;
+    padding: 8px;
+    right: 17vw;
+    z-index: 880;
+  }
+
+
+.sub-menu nav{
+    margin-top: 16px;
+}
+/* 320px — 480px: Mobile devices
+481px — 768px: iPads, Tablets
+769px — 1024px: Small screens, laptops
+1025px — 1200px: Desktops, large screens
+1201px and more —  Extra large screens, TV */
+
+@media (max-width: 1024px) {
+    .menu {
+        width: 0;
+        right: -30px;
+        overflow: hidden;
+      }
+      .uix-continer {
+        margin: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: right;
+        padding-inline-start: 0;
+    }
+}
+
+.css-1m7hcep-JoyInput-root,.MuiTextarea-root,.ck,.MuiSelect-root {
+    background: #21293600 !important;
+    border-color: #a0a0a082;
+    color: gray;
+}
+.MuiListItemDecorator-root {
+    padding-left: 11px;
+}
+.card h3 {
+    padding: 20px 0 0 0;
+    font-size: 20px;
+}
+
+.ck.ck-editor__main>.ck-editor__editable:not(.ck-focused) {
+    border-color: var(--ck-color-base-border);
+    min-height: 200px;
+}
+
+
+
+
+
+
