@@ -490,3 +490,4 @@ header .wallet div{
   direction: rtl;
   text-align: right;
  }
+ .text-center {text-align: center!important;}

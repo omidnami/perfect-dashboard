@@ -141,7 +141,7 @@ export default function Product(props:any) {
                                 </Tooltip>
                                 <Tooltip title='موجودی انبار'>
                                 <IconButton disabled={false} variant="solid" 
-                                onClick={() => props.depoClick(props.uniqueId)}
+                                onClick={() => props.depoClick(props.uniqueId, response.lang)}
                                 >
                                 <TfiSearch />
                                 </IconButton>

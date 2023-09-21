@@ -88,10 +88,11 @@ const menus = [
         link:null,
         path:'settings',
         child:[
-            {title:' تنظیمات اصلی',icone:<HiComputerDesktop />, link:null,},
-            {title:' تنظیمان کسب وکار',icone:<HiComputerDesktop />, link:null,},
-            {title:' تنظیمات پرداخت و حمل',icone:<HiComputerDesktop />, link:null,},
-            {title:' تنظیمات ظاهری',icone:<HiComputerDesktop />, link:null,}
+            {title:' تنظیمات اصلی',icone:<HiComputerDesktop />, link:'/settings/base',},
+            {title:' تنظیمان کسب وکار',icone:<HiComputerDesktop />, link:'settings/job',},
+            {title:' تنظیمات پرداخت و حمل',icone:<HiComputerDesktop />, link:'settings/pay',},
+            {title:' تنظیمات ظاهری',icone:<HiComputerDesktop />, link:'settings/style',},
+            {title:' تنظیمات اطلاع رسانی',icone:<HiComputerDesktop />, link:'/settings/connects',}
         ],
     },
     {
@@ -101,28 +102,28 @@ const menus = [
         link:null,
         path:'support',
         child:[
-            {title:' مدیریت تیکت ها',icone:<HiComputerDesktop />, link:null,},
+            //{title:' مدیریت تیکت ها',icone:<HiComputerDesktop />, link:null,},
             {title:' مدیریت اطلاع رسانی',icone:<HiComputerDesktop />, link:null,},
             {title:'صفحه تماس',icone:<HiComputerDesktop />, link:null,},
             {title:'صفحه حریم خصوصی',icone:<HiComputerDesktop />, link:null,},
             {title:'صفحه قوانین و مقررات',icone:<HiComputerDesktop />, link:null,},
         ],
     },
-    {
-        id:8,
-        title:'تجارت الکترونیک',
-        icone:<HiComputerDesktop />,
-        link:'/',
-        path:'content',
-        child:[
-            {title:' آنالیز سایت',icone:<HiComputerDesktop />, link:null,},
-            {title:' مدیریت نقشه سایت',icone:<HiComputerDesktop />, link:null,},
-            {title:'برسی محتوا',icone:<HiComputerDesktop />, link:null,},
-            {title:' کمپین های تبلیغاتی',icone:<HiComputerDesktop />, link:null,},
-            {title:'باشگاه مشتریان',icone:<HiComputerDesktop />, link:null,},
-            {title:'بازاریابی (Afiliet Marketing)',icone:<HiComputerDesktop />, link:null,},
-        ],
-    },
+    // {
+    //     id:8,
+    //     title:'تجارت الکترونیک',
+    //     icone:<HiComputerDesktop />,
+    //     link:'/',
+    //     path:'content',
+    //     child:[
+    //         {title:' آنالیز سایت',icone:<HiComputerDesktop />, link:null,},
+    //         {title:' مدیریت نقشه سایت',icone:<HiComputerDesktop />, link:null,},
+    //         {title:'برسی محتوا',icone:<HiComputerDesktop />, link:null,},
+    //         {title:' کمپین های تبلیغاتی',icone:<HiComputerDesktop />, link:null,},
+    //         {title:'باشگاه مشتریان',icone:<HiComputerDesktop />, link:null,},
+    //         {title:'بازاریابی (Afiliet Marketing)',icone:<HiComputerDesktop />, link:null,},
+    //     ],
+    // },
 ]
 export default function Menu() {
     const router = useRouter()

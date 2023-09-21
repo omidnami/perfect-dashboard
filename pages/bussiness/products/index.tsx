@@ -5,7 +5,7 @@ import Product from "@/Components/listItem/product";
 import Menu from "@/Components/menu";
 import useFetch from "@/Hooks/useFetch";
 import Container from "@/Layouts/Continer";
-import { Box, Button, Card, Chip, CircularProgress, Divider, FormLabel, Grid, Input, Modal, ModalDialog, Typography } from "@mui/joy";
+import { Alert, Box, Button, Card, Chip, CircularProgress, Divider, FormLabel, Grid, Input, Modal, ModalDialog, Option, Select, Typography } from "@mui/joy";
 import { FormControlLabel, Pagination, Switch } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -31,6 +31,12 @@ export default function Manufactur() {
     const [langDeletId, setLangDeletId] = useState<any>(0)
     const [settingOpen, setSettingOpen] = useState<any>(false)
     const [depo, setDepo] = useState<boolean>(false)
+    const [depoDynamic, setDepoDynamic] = useState<any[]>([])
+    const [depoLocation, setDepoLocation] = useState<any[]>([])
+    const [sule, setSule] = useState<any[]>([])
+    const [depoMain, setDepoMain] = useState<number>(0)
+    const [defaultSule, setDefaultSule] = useState<number>(0)
+    const [depoSaver, setdepoSaver] = useState<any[]>([])
 
     const [setting, setSetting] = useState(serverSetting)
 
@@ -64,6 +70,16 @@ export default function Manufactur() {
                 'lang': localStorage.getItem('_lang_')
               }
             postData(`product/select/?page=${page}`,null,header)
+          }
+          if (response?.msg === 'dynamic_set') {
+            setDepoDynamic(response.data)
+              setDepo(true)
+              setDepoLocation(response.depos)
+              setDepoMain(response.depos[0].id)
+              console.log(response.depos[0].id);
+              const d = response.depos.filter((e: { did: any; })=> e.did === response.depos[0].id)
+              setSule(d)
+              setDefaultSule(d[0].id)
           }
     }, [response])
 
@@ -134,9 +150,72 @@ export default function Manufactur() {
       console.log(JSON.parse(d.settings));
     }
 
-    const depoClickHandle = (uniq:any) => {
-      console.log(uniq);
+    const depoClickHandle = (uniq:any, l:any) => {
+      console.log(uniq, l[0].lang);
+      const header = {
+        "lang" : l[0].lang
+        }
+
+      postData('product/get_dynamic',{unique:uniq},header)
+    }
+
+    const depoMainChangeHandle = async (v:any) => {
+            setDepoMain(v)
+            console.log('depomain',v);
+            
+            const d = await depoLocation.filter((e: { did: any; })=> e.did === v)
+            setSule(d);
+            setDefaultSule(d[0].id)
+            console.log('allsule' ,d);
+            console.log('sule', d[0].id);
+    }
+
+    const saveHandleDepo = async (id:any, v:any) => {
+      const sul = await depoLocation.filter((e: { did: any })=> e.did === v)
+      setSule(sul);
+      const ds = depoSaver.filter(e=> e.id === id)
+      if (!ds || !ds?.length){
+        setdepoSaver([...depoSaver,{id:id, quty:0, depo:v, sule:sul[0].id}])        
+      }else{
+        let d:any = ds[0]
+        d = {...d,depo:v, sule:sul[0].id}
+        const dl = depoSaver.filter(e=> e.id !== id)
+        console.log(sul);
+        
+        console.log(v);
+        
+        setdepoSaver([...dl,d])
+      }
+      setDefaultSule(sul[0].id)
+
+      //console.log(depoSaver);
       
+    }
+
+    const saveHandleSule = (id:any, s:any) => {
+      const ds = depoSaver.filter(e=> e.id === id)
+      if (!ds || !ds?.length){
+        setdepoSaver([...depoSaver,{id:id, quty:0, depo:depoMain, sule:s}])
+      }else{
+        let d:any = ds[0]
+        d = {...d,sule:s}
+        const dl = depoSaver.filter(e=> e.id !== id)
+        console.log(dl);
+        setdepoSaver([...dl,d])
+      }
+    }
+
+    const saveHandleQuty = (id:any, q:any) => {
+      const ds = depoSaver.filter(e=> e.id === id)
+      if (!ds || !ds?.length){
+        setdepoSaver([...depoSaver,{id:id, quty:Number(q), depo:depoMain, sule:defaultSule}])
+      }else{
+        let d:any = ds[0]
+        d = {...d,quty:q}
+        const dl = depoSaver.filter(e=> e.id !== id)
+        console.log(d);
+        setdepoSaver([...dl,d])
+      }
     }
 
     return(
@@ -170,8 +249,8 @@ export default function Manufactur() {
                     setLangDelet(l)
                     delLang(item.id)
                   }}
-                  depoClick={(e:any) => {
-                    depoClickHandle(e)
+                  depoClick={(e:any, l:any) => {
+                    depoClickHandle(e, l)
                   }}
                   lang={item.lang}
                   clicked={(u:any) => handleOpenSetting(u)}
@@ -361,57 +440,96 @@ export default function Manufactur() {
 
           </Typography>
           <Divider />
-          <Grid container spacing={1.5}>
-                            <Grid xs={5}>
-                                <FormLabel>
-                                    <span>عنوان<small className="text-danger pr-1">*</small></span> 
-                                <Input
-                                    size={'lg'}
-                                    startDecorator={<AiOutlineFontSize />}
-                                    fullWidth
-                                    required
-                                    value=''
-                                    id="fname"
-                                />
-                                </FormLabel>
-                            </Grid>
+          <Alert sx={{opacity:.5}} variant="soft" color="primary">
+            <p>موجودی جدید به موجودی قبلی افزوده میشود.</p>
+            <p>موجودی جدید در انبار انتخابی قرار دارد</p>
+            
+          </Alert>
+          <br/>
+          {
+            depoDynamic.map(item => {
+              const arry = depoSaver.filter(e=> e.id === item.id)
+              return (
+                <Grid key={item.id} container spacing={1.5}>
+                  <Grid xs={12}>{item.type} {item.value}</Grid>
+                                  <Grid xs={5}>
+                                      <FormLabel>
+                                          <span>انبار<small className="text-danger pr-1">*</small></span> 
+                                      <Select
+                                          size={'lg'}
+                                          value={arry.length?arry[0].depo:depoMain}
+                                          sx={{width:'100%'}}
+                                          onChange={(e, v:any) => {
+                                            saveHandleDepo(item.id, v)
+                                          }}  
+                                      >
+                                        {depoLocation.map(d => {
+                                          if (d.did) {
+                                            return false
+                                          }
+                                          return(
+                                            <Option key={d.id} value={d.id}>{d.title} انبار {d.depo}</Option>
 
-                            <Grid xs={3}>
-                                <FormLabel>
-                                    <span>کنونیکال</span> 
-                                <Input
-                                    size={'lg'}
-                                    startDecorator={<AiOutlineLink/>}
-                                    fullWidth
-                                    value=''
-                                />
-                                </FormLabel>
-                            </Grid>
+                                          )
+                                        })}
+                                      </Select>
+                                      </FormLabel>
+                                  </Grid>
 
-                            <Grid xs={4}>
-                                <FormLabel>
-                                    <span>کلمات کلیدی</span> 
-                                <Input
-                                    size={'lg'}
-                                    endDecorator={
-                                        <Chip sx={{paddingTop:'8px'}} size="sm" color="danger" variant="soft">
-                                        +5
-                                        </Chip>
-                                    }
-                                    fullWidth
-                                    value=''
-                                />
-                                </FormLabel>
-                            </Grid>
-            </Grid>
+                                  <Grid xs={3}>
+                                      <FormLabel>
+                                          <span>سوله</span> 
+                                          <Select
+                                          size={'lg'}
+                                          value={arry.length?arry[0].sule:defaultSule}
+                                          sx={{width:'100%'}}
+                                          onChange={(e, v:any) => {
+                                            saveHandleSule(item.id, v)
+                                          }}
+                                      >
+                                        {sule.map(s => {
+                                          return(
+                                            <Option key={s.id} value={s.id}>ر {s.row} ق{s.Shelf}</Option>
+                                          )
+                                        })}
+                                      </Select>
+                                      </FormLabel>
+                                  </Grid>
+
+                                  <Grid xs={3}>
+                                      <FormLabel>
+                                          <span>تعداد ({JSON.parse(item.depo).vahed})</span> 
+                                      <Input
+                                          size={'lg'}
+                                          fullWidth
+                                          value={arry.length && arry[0]?.quty?arry[0].quty:''}
+                                          type="number"
+                                          onChange={(e) => {
+                                            saveHandleQuty(item.id, e.target.value)
+                                          }}
+                                      />
+                                      </FormLabel>
+                                  </Grid>
+                                  <Grid xs={1}>
+                                      <FormLabel>
+                                        <Button
+                                        sx={{marginTop:4.3}}
+                                        >+</Button>
+                                      </FormLabel>
+                                  </Grid>
+                                  <Grid xs={12}><Divider/><br/></Grid>
+
+                </Grid>
+
+              )
+            })
+          }
 
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
             <Button variant="plain" color="neutral">
-              انصراف
+              بستن
             </Button>
-            <Button variant="solid" color="danger">
-              ثبت اطلاعات 
-            </Button>
+
           </Box>
         </ModalDialog>
    </Modal>
