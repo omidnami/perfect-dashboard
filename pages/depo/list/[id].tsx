@@ -28,6 +28,7 @@ export default function ListDepo() {
         if (response?.total){
             setData(response)
         }
+        document.body.classList.remove('loading')
     }, [response])
 
     //action

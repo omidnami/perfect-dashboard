@@ -1,8 +1,7 @@
-import { ClassNames } from "@emotion/react"
+import ThemplateContext from "@/Context/ThemplateContext"
 import { Button, List, ListItem, ListItemButton, ListItemContent, ListItemDecorator } from "@mui/joy"
-import Link from "next/link"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { HiChevronDoubleLeft, HiComputerDesktop } from "react-icons/hi2"
 const menus = [
     {
@@ -32,16 +31,16 @@ const menus = [
         link:null,
         path:'content',
         child:[
-            {title:' ایجاد مقاله',icone:<HiComputerDesktop />, link:null,},
-            {title:' مدیریت مقالات',icone:<HiComputerDesktop />, link:null,},
-            {title:' دسته بندی محتوا',icone:<HiComputerDesktop />, link:null,},
+            // {title:' ایجاد مقاله',icone:<HiComputerDesktop />, link:'/article/blog/insert/',},
+            {title:' مدیریت مقالات',icone:<HiComputerDesktop />, link:'/article/blog',},
+            {title:' دسته بندی محتوا',icone:<HiComputerDesktop />, link:'/article/category/0',},
             {title:' پیشنویس',icone:<HiComputerDesktop />, link:null,},
-            {title:'ایجاد صفحه',icone:<HiComputerDesktop />, link:null,},
-            {title:'مدیریت صفحات',icone:<HiComputerDesktop />, link:null,}
+            // {title:'ایجاد صفحه',icone:<HiComputerDesktop />, link:null,},
+            {title:'مدیریت صفحات',icone:<HiComputerDesktop />, link:'/article/page',}
         ],
     },
     {
-        id:4,
+        id:5,
         title:'مدیریت کسب و کار',
         icone:<HiComputerDesktop />,
         link:null,
@@ -56,7 +55,7 @@ const menus = [
         ],
     },
     {
-        id:5,
+        id:6,
         title:'انبار داری',
         icone:<HiComputerDesktop />,
         link:null,
@@ -68,7 +67,7 @@ const menus = [
         ],
     },
     {
-        id:5,
+        id:7,
         title:'گزارشات',
         icone:<HiComputerDesktop />,
         link:null,
@@ -82,7 +81,7 @@ const menus = [
         ],
     },
     {
-        id:6,
+        id:8,
         title:'تنظیمات',
         icone:<HiComputerDesktop />,
         link:null,
@@ -96,7 +95,7 @@ const menus = [
         ],
     },
     {
-        id:7,
+        id:9,
         title:'پشتیبانی',
         icone:<HiComputerDesktop />,
         link:null,
@@ -130,6 +129,7 @@ export default function Menu() {
     const [subMenu, setSubMenu] = useState(false)
     const [menu, setMenu] = useState<any>(null)
     const [path, setPath] = useState('')
+    const template = useContext(ThemplateContext)
     useEffect(() => {
         const continer = document.getElementById('uix-continer');
         continer?.addEventListener('click',() => {
@@ -144,6 +144,29 @@ export default function Menu() {
         let rr = r.split('/')
         setPath(rr[1])        
     }, [router])
+
+    useEffect(() => {
+        console.log(template);
+
+        const tools = menus.filter(e=> e.id === 4)
+
+        if (!tools.length) {
+            menus.push({
+                id:4,
+                title:' ابزارک ها',
+                icone:<HiComputerDesktop />,
+                link:null,
+                path:'plugins',
+                child:[
+                    {title:'تایپینگ مدیا',icone:<HiComputerDesktop />, link:'/plugins/sliders/typing_media',},
+                    {title:'نمایش متن',icone:<HiComputerDesktop />, link:'/plugins/text_view',},
+                    {title:'منو',icone:<HiComputerDesktop />, link:'/plugins/menu',},
+                    {title:'پارالاکس',icone:<HiComputerDesktop />, link:null,},
+                ],
+            },)
+        }
+        
+    }, [])
 
     const onMenuOpenHandle = (id:Number) => {
         setMenu(null)

@@ -33,6 +33,7 @@ export default function Users() {
       router.push(`/users/?page=${page}`)
       setOpen(false)
     }
+    document.body.classList.remove('loading')
     
   }, [response])
 

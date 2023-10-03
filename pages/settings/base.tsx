@@ -6,12 +6,16 @@ import Container from "@/Layouts/Continer";
 import { AspectRatio, Box, Button, Card, Divider, FormLabel, Grid, Input, Option, Select, Textarea } from "@mui/joy";
 import { FormControlLabel, Switch } from "@mui/material";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Base() {
     const router = useRouter()
     const [file, setFile] = useState()
     const [fileLoad, setFileLoad] = useState()
+
+    useEffect(() => {
+        document.body.classList.remove('loading')
+    })
     return (
         <main className="main">
             <Menu />

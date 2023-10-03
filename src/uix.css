@@ -31,9 +31,12 @@ h1 {
     margin-top: 16px;
 }
 
-.menu nav ul li .css-1kgs6hp-JoyListItemButton-root.Mui-selected{
+.menu nav ul li .css-1kgs6hp-JoyListItemButton-root.Mui-selected, .css-qcqbac.Mui-selected{
     background-color: #33353a !important;
 
+}
+.css-1kgs6hp-JoyListItemButton-root:not(.Mui-selected, [aria-selected="true"]):hover, .css-qcqbac:not(.Mui-selected, [aria-selected="true"]):hover {
+    background-color: var(--joy-palette-neutral-plainHoverBg, var(--joy-palette-neutral-50, #ffffff0c)) !important;
 }
 
 button.primary,.btn-primary {

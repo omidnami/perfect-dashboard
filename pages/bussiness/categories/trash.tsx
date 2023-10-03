@@ -39,7 +39,6 @@ export default function Categories() {
         setPage(Number(router.query.page))
       }
         postData(`product_cat/select/-1?page=${page}`,null)
-        
     }, [])
 
 
@@ -82,6 +81,8 @@ export default function Categories() {
           canonical:''
         })
       }
+      document.body.classList.remove('loading')
+
     }, [response])
 
   

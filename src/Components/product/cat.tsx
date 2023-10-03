@@ -135,7 +135,7 @@ export default function Cat(props:any) {
 
     const server = async (unique:any,c:string,item:any={}) => {
             try {
-                await fetch('http://127.0.0.1:8000/api/v1/product_cat/select_detail/'+unique, {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product_cat/select_detail/${unique}`, {
                     method: 'POST',
                     headers: {
                         'lang': props.lang
@@ -334,7 +334,7 @@ export default function Cat(props:any) {
                 </Grid>
             </Grid>
             <Card
-                sx={{padding:20, marginTop:3,position:'relative',display:{sm:'none', xs:'none'}}}
+                sx={{padding:20, marginTop:3,position:'relative'}}
                 className='card'
             >
                 <List orientation="horizontal" style={{float:'right'}}>

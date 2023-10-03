@@ -26,7 +26,7 @@ export default function Attribute(props:any) {
         //console.log(props.cat);
         
         
-        await fetch('http://127.0.0.1:8000/api/v1/attribute/select/gp/cat',{
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/attribute/select/gp/cat`,{
             method: 'POST',
             headers: {
                 'lang': props.lang,

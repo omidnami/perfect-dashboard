@@ -7,7 +7,7 @@ const useFetch = () => {
 
     const postData = async(api='', data:any, header:any= {}) => {
         
-        await axios.post(`http://127.0.0.1:8000/api/v1/${api}`, data,{
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/${api}`, data,{
             headers: header
         }).then((result:any) => {
             setResponse(result.data)

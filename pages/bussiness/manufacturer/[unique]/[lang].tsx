@@ -8,8 +8,6 @@ import { AspectRatio, Box, Button, Card, Chip, Divider, FormLabel, Grid, Input, 
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { AiOutlineFontSize, AiOutlineLink, AiOutlineSearch } from "react-icons/ai";
-import { CKEditor, CKEditorContext } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import { HiCalendar, HiCreditCard, HiDevicePhoneMobile, HiDocumentText, HiEnvelope, HiFlag, HiGlobeAlt, HiKey, HiMap, HiPhone, HiUser } from "react-icons/hi2";
 import { ifError } from "assert";
@@ -64,7 +62,7 @@ export default function Store() {
             })
 
             if (response.url) {
-                setFileLoad(`http://127.0.0.1:8000${response.url}`)
+                setFileLoad(`${process.env.NEXT_PUBLIC_API_URL}${response.url}`)
             }else {
                 setFileLoad('')
             }
@@ -103,9 +101,7 @@ export default function Store() {
             setFileLoad('')
             setFile(undefined)
             setTags([])
-            console.log('404 ', lang); 
         }
-        
     }, [response])
 
     useEffect(() => {      
@@ -256,27 +252,17 @@ export default function Store() {
                                     <FormLabel>
                                         <span> اطلاعات تکمیلی</span>
                                     </FormLabel>
-
-                                        
-                                            <CKEditor
-                                                editor={ ClassicEditor }
-                                                data={formData.text || ''}
-                                                onReady={ editor => {
-                                                    // You can store the "editor" and use when it is needed.
-                                                } }
-                                                onChange={ ( event, editor ) => {
-                                                    setTyping(true)
-                                                    const data = editor.getData();
-                                                    // console.log( { event, editor, data } );
-                                                    setFormData({...formData,text:data})
-                                                } }
-                                                onBlur={ ( event, editor ) => {
-                                                    console.log( 'Blur.', editor );
-                                                } }
-                                                onFocus={ ( event, editor ) => {
-                                                    console.log( 'Focus.', editor );
-                                                } }
-                                            />
+                                    <Textarea
+                                        sx={{
+                                            width:'100%'
+                                        }}
+                                        minRows={8}
+                                        size="lg"
+                                        value={formData.text}
+                                        onChange={(e) => {
+                                            setFormData({...formData,text:e.target.value})
+                                        }}  
+                                        />
                                         
                                 </Grid>
                             </Grid>

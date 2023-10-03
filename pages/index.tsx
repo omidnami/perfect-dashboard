@@ -6,9 +6,12 @@ import Container from '@/Layouts/Continer';
 import Chart from 'chart.js/auto';
 
 import {CategoryScale} from 'chart.js'; 
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 Chart.register(CategoryScale);
 
 export default function Home() {
+  const router = useRouter()
   const data = {
     labels: ['10 روز قبل', '9 روز قبل', '8 روز قبل', '7 روز قبل', '6 روز قبل', '5 روز قبل', '4 روز قبل', '3 روز قبل', '2 روز قبل', 'دیروز'],
     datasets: [
@@ -50,7 +53,9 @@ export default function Home() {
     width: '100%',
     height: 500
   };
-
+  useEffect(() => {
+    document.body.classList.remove('loading')
+  },[])
   return (
     <main className='main'>
       <Menu />

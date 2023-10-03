@@ -641,8 +641,8 @@ export default function Tanavo() {
                                                             <CardOverflow>
                                                                 <AspectRatio>
                                                                 <img
-                                                                    src={"http://127.0.0.1:8000"+v.url}
-                                                                    srcSet={"http://127.0.0.1:8000"+v.url}
+                                                                    src={process.env.NEXT_PUBLIC_API_URL+v.url}
+                                                                    srcSet={process.env.NEXT_PUBLIC_API_URL+v.url}
                                                                     loading="lazy"
                                                                     alt=""
                                                                 />

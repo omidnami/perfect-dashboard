@@ -69,11 +69,7 @@ export default function Insert() {
             setFormUser(response)
             if (response.person_data) {
                 setData()
-            }
-            
-
-            console.log('* effect setData *',formData);
-            
+            }            
         }
         console.log(formData,formUser);
         document.querySelector('input')?.classList.remove('err')
@@ -83,6 +79,7 @@ export default function Insert() {
             setFormUser(initialsUser)
         }
       // eslint-disable-next-line react-hooks/exhaustive-deps
+      document.body.classList.remove('loading')
       }, [response])
 
       const setData = async () => {

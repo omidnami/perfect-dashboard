@@ -33,10 +33,10 @@ export default function Detail(props:any) {
     useEffect(() => {
         
         if (props.cat) {
-            server('http://127.0.0.1:8000/api/v1/product_cat/select_detail/'+props.cat,'cat')
+            server(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/product_cat/select_detail/${props.cat}`,'cat')
         }
 
-        server('http://127.0.0.1:8000/api/v1/brand/select_detail','brand')
+        server(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/brand/select_detail`,'brand')
                     window.scrollTo(0, 500);
     },[route])
 

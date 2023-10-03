@@ -1,4 +1,6 @@
 
+import ConfContext from "@/Context/ConfConext";
+import ThemplateContext from "@/Context/ThemplateContext";
 import useFetch from "@/Hooks/useFetch";
 import Author from "@/Libs/Auth";
 import { Avatar, Badge, Box, Card, Container, Grid, Input, Stack } from "@mui/joy";
@@ -11,6 +13,8 @@ export default function Header(props:any) {
     const router = useRouter()
     const {postData, response}  = useFetch()
     const [dataUser, setDataUser] = useState<any>({})
+    const conf = useContext(ConfContext)
+    const them = useContext(ThemplateContext)
 
     useEffect(() => {
             postData('auth/check',{token:localStorage.getItem('_token_')})
@@ -52,7 +56,7 @@ export default function Header(props:any) {
                     </Grid>
                     <Grid xs={8.9}>
                         <div className="wallet" style={{float:'left',textAlign:'left'}}>
-                            <Input readOnly value={dataUser?.fname} startDecorator={<HiWallet />} />
+                            <Input readOnly value={them.name} startDecorator={<HiWallet />} />
                         </div>
                     </Grid>
                 </Grid>

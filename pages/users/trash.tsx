@@ -33,7 +33,7 @@ export default function Trash() {
       router.push(`/users/?page=${page}`)
       setOpen(false)
     }
-    
+    document.body.classList.remove('loading')
   }, [response])
 
   const handleChange = (e:any, v:any) => {

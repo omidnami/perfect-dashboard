@@ -28,7 +28,7 @@ export default function Manufacturer(props:any) {
                       >
                         <ListItem>
                           <ListItemDecorator>
-                            <Avatar size="lg" sx={{ '--Avatar-size': '60px' }} src={response?.img&&`http://127.0.0.1:8000${response.img.url}`}>
+                            <Avatar size="lg" sx={{ '--Avatar-size': '60px' }} src={response?.img&&`${process.env.NEXT_PUBLIC_API_URL}${response.img.url}`}>
                               {props.title[0]}
                             </Avatar>
                           </ListItemDecorator>

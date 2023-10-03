@@ -15,11 +15,14 @@ export default function TagMaker(props:any) {
             setInput('')
         }
     }
-    document.getElementById(props.id)?.addEventListener('keypress',(e) => {
-        if(e.key === 'Enter') {
-            addTag()
-        }
-    })
+    if (typeof document !== 'undefined') {
+        // کدی که به document دسترسی دارد
+        document.getElementById(props.id)?.addEventListener('keypress',(e) => {
+            if(e.key === 'Enter') {
+                addTag()
+            }
+        })
+      }
 
     const gt = (tag:string) => {
         props.getTags(tag)

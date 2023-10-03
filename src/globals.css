@@ -203,22 +203,22 @@ a {
 .card {
   padding: 0.5rem 1.2rem;
   border-radius: var(--border-radius);
-  background: rgba(var(--card-rgb), 1);
-  border: 1px solid rgba(var(--card-border-rgb), 0);
-  transition: background 200ms, border 200ms;
-  color:rgb(var(--color),1);
+  background: rgba(var(--card-rgb), 1) !important;
+  border: 1px solid rgba(var(--card-border-rgb), 0) !important;
+  transition: background 200ms, border 200ms !important;
+  color:rgb(var(--color),1) !important;
 }
 .modal-omid {
-  background: rgba(var(--card-rgb), 1);
-  color:rgb(var(--color),1);
-  border: 1px solid rgba(var(--card-border-rgb), 0);
+  background: rgba(var(--card-rgb), 1) !important;
+  color:rgb(var(--color),1) !important;
+  border: 1px solid rgba(var(--card-border-rgb), 0) !important;
 }
 .modal-omid h2,.modal-omid button {
-  color:rgb(var(--color),.8);
+  color:rgb(var(--color),.8) !important;
 }
 .modal-omid h2 {
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgb(var(--color),.1);
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid rgb(var(--color),.1) !important;
 }
 
 .card label span,label span {
@@ -491,3 +491,7 @@ header .wallet div{
   text-align: right;
  }
  .text-center {text-align: center!important;}
+
+ ul li ul li div span div span, ul li ul li div div span {
+  color: gray !important;
+ }

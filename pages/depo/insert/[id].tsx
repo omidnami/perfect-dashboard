@@ -54,7 +54,7 @@ export default function Depo() {
         else if (response?.status && response?.msg === 'success') {
             setSuccess(true)
         }
-        
+        document.body.classList.remove('loading')
     }, [response])
 
 
