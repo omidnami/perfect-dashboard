@@ -2,7 +2,7 @@ import Header from "@/Components/header";
 import Menu from "@/Components/menu";
 import useFetch from "@/Hooks/useFetch";
 import Container from "@/Layouts/Continer";
-import { AspectRatio, Button, Card, Divider, FormLabel, Grid, Input, Skeleton } from "@mui/joy";
+import { AspectRatio, Button, Card, Divider, FormLabel, Grid, Input, Option, Select, Skeleton } from "@mui/joy";
 import { useRouter } from "next/router";
 import { Component, useEffect, useRef, useState } from "react";
 import { HiCalendarDays, HiCreditCard, HiDevicePhoneMobile, HiEnvelope, HiFlag, HiKey, HiMap, HiOutlineIdentification, HiPhone, HiUser } from "react-icons/hi2";
@@ -11,7 +11,7 @@ interface USER {
     fname: string,
     lname: string,
     phone: string,
-    rol: Number,
+    rol: any,
     email: string,
     userName: string,
     password: string,
@@ -32,7 +32,7 @@ const initialsUser:USER = {
     fname: '',
     lname: '',
     phone: '',
-    rol: 0,
+    rol: '',
     email: '',
     userName: '',
     password: '',
@@ -71,10 +71,9 @@ export default function Insert() {
                 setData()
             }            
         }
-        console.log(formData,formUser);
         document.querySelector('input')?.classList.remove('err')
 
-        if (response?.status && !Number(router.query?.uid)) {
+        if (response?.status && !Number(router.query?.uid && response?.email)) {
             setFormData(initialsUserData)
             setFormUser(initialsUser)
         }
@@ -115,7 +114,7 @@ export default function Insert() {
       }
 
     return (
-        <main className='main'>
+        <main>
         <Menu />
         <Container>
             <Header />
@@ -335,7 +334,23 @@ export default function Insert() {
                 }}
                 />
                 </label> 
+
                 {response?.errors?.file&&<span className="err">{response?.errors?.file}</span>}
+                <FormLabel>
+                    <span>نوع حساب کاربری</span>
+                    <Select
+                    sx={{width:'100%'}}
+                    value={formUser?.rol}
+                    onChange={(e, v) => {
+                        setFormUser({...formUser,rol:v});
+                    }}
+                    >
+                        <Option value="">انتخاب یک نوع حساب</Option>
+                        <Option value="2">کاربر (مشتری)</Option>
+                        <Option value="1">مدیر (Admin)</Option>
+                        <Option value="0">مسدود</Option>
+                    </Select>
+                </FormLabel>
                     <FormLabel>
                     <span>نام کاربری<small className="text-danger pr-1">*</small></span> 
 

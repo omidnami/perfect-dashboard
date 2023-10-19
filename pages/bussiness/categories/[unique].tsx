@@ -11,38 +11,39 @@ import { RiDeleteBin6Line, RiPencilLine, RiArrowLeftSLine, RiFileWarningFill } f
 import { AiOutlineLink, AiOutlineFontSize, AiOutlineFileSearch } from "react-icons/ai"
 import Lang from "@/Components/lang";
 import Category from "@/Components/listItem/categury";
+import ArticleCat from "@/Components/listItem/articleCat";
+import { getArticleCatParent } from "@/Libs/getParent";
 
-export default function Trash() {
+export default function Cat() {
     const router = useRouter()
     const [open, setOpen] = useState<boolean>(false)
-    const {postData, response, status} = useFetch()
-    const [data, setData] = useState({data:[],total:0,per_page:10,current_page:1})
+    const [data, setData] = useState<any>({data:[],total:0,per_page:10,current_page:1})
     const [page, setPage] = useState(1)
     const [deletId, setDeleteId] = useState(0);
-
+    
+    const {postData, response} = useFetch()
 
     const [newModal, setNewModal] = useState<boolean>(false)
     const [selectLang, setSelectLang] = useState<boolean>(true)
     const [formData, setFormData] = useState<any>({})
-    const [lang, setLang] = useState('')
+    const [lang, setLang] = useState<any>()
     const [file, setFile] = useState<File>()
-    const [unique, setUnique] = useState('')
-    const [id, setId] = useState(0)
-    const [pid, setPid] = useState<any>(0)
+    const [unique, setUnique] = useState<any>('')
+    const [id, setId] = useState<any>(0)
+    const [langDelet, setLangDelet] = useState<any>('')
+    const [ldopen, setLdopen] = useState<boolean>(false)
+    const [langDeletId, setLangDeletId] = useState<any>(0)
     
     useEffect(() => {
-      if (router.query.pid) {
-        var p = router.query.pid
-        setPid(p)
+      setData({data:[],total:0,per_page:10,current_page:1})
+      if (router.query.unique) {
+        var u = router.query.unique
+        setId(u)
       }
       if (!lang) {
-        setLang(localStorage.getItem('_lang_') || '')
+        setLang(localStorage.getItem('_lang_'))
       }
-
-      if (router.query.page) {
-        setPage(Number(router.query.page))
-      }
-        postData(`product_cat/select/${router.query.pid}?page=${page}`,{status:1})
+        postData(`product_cat/select`,{cid:router.query.unique, page: page})
     }, [router])
 
 
@@ -55,74 +56,47 @@ export default function Trash() {
   
     useEffect(() => {
       console.log(response);
-      
-      if (response?.data?.length === 0) { 
-        setData({data:[],total:0,per_page:10,current_page:1})
-      }
-      if (response?.total) {
-
-        setData(response)
-      }
-
       if (response?.status) {
-        router.push(`${pid}?page=${page}`)
-        setOpen(false)
-        postData(`product_cat/select/${pid}`,{status:1})
-      }
+            if (response?.msg === 'cat_inserted') {
+                setNewModal(false)
+                setFormData({})
+                router.push(`/bussiness/categories/${id}/?page=1`)
+            }else if (response?.slug) {
+                setFormData(response)
+            }else if (response?.msg === 'cat_updated') {
+                router.push(`/bussiness/categories/${id}/?page=1`)
 
-      if (response?.title && !selectLang && unique) {
-        
-        setFormData(response)
-      }
-      if (response?.status && selectLang) {
-        setNewModal(false)
-        setFormData({
-          title: '',
-          lang: '',
-          slug: '',
-          file: '',
-          cid: '',
-          meta_description:'',
-          meta_key:'',
-          canonical:''
-        })
-        setId(0)
-        setUnique('')
-      }
+            }else if (response?.msg === 'cat_deleted') {
+                setUnique('')
+                setOpen(false)
+                setLdopen(false)
+                router.push(`/bussiness/categories/${id}/?page=${page}`)
 
+            }
+
+      }else if (response?.total) {
+        setData(response)
+      }else if (response?.data?.length === 0) { 
+          setData({data:[],total:0,per_page:10,current_page:1})
+      }
+     
       document.body.classList.remove('loading')
-
     }, [response])
 
 
     useEffect(() => {
-      setFormData({
-        title: '',
-        lang: '',
-        slug: '',
-        file: '',
-        cid: '',
-        meta_description:'',
-        meta_key:'',
-        canonical:''
-      })
-
-      
 
     }, [lang])
 
   
+    
+    
+    
+    //action
+    
     const handleChange = (e:any, v:any) => {
-     setPage(v)
-      
-      router.push(pid+'?page='+v)
-      
+        setPage(v)      
     }
-
-
-
-    //new
-
 
     const onClickNewCatHandel = () => {
         setNewModal(true)
@@ -139,7 +113,7 @@ export default function Trash() {
         'lang': lang
       }
       
-      const data = {...formData,file:file,cid:pid}
+      const data = {...formData,file:file,cid:id}
 
       if (unique) {
         await postData('product_cat/update',{...data,unique:unique}, header)
@@ -153,11 +127,13 @@ export default function Trash() {
     const handleDeleteCat = () => {
       if (unique) {
         document.body.classList.add('loading')
-        postData('product_cat/delete',{unique:unique})
+        postData('article/cat/delete',{unique:unique})
       }
     }
 
     const onClickEditCatHandel = async (id:any) => {
+        document.body.classList.add('loading')
+
       let header = {
         'lang': lang
       }
@@ -185,11 +161,24 @@ export default function Trash() {
     }
     
     const onChangeLangHadle = async (e:any) => {
+      setFormData({title:'',canonical:'',meta_key:'',meta_description:''})
       setLang(e)
       let header = {
         'lang': e
       }
-       postData(`product_cat/select`,{unique:unique},header)
+      await postData(`product_cat/select`,{unique:unique},header)
+    }
+
+    const delLang = (id:any) => {
+      setLangDeletId(id)
+      setLdopen(true)
+    }
+
+    const handleDeleteLang = () => {
+      if (langDeletId) {
+        document.body.classList.add('loading')
+        postData('product_cat/delete_lang',{id:langDeletId})
+      }
     }
 
     return (
@@ -200,11 +189,11 @@ export default function Trash() {
                 <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}>
                   دسته بندی کالا و خدمات
                 {
-                  pid !== '0'?
+                  id !== '0'?
                 <small
                 onClick={() => router.back()
                 }
-                 className="mute text-small small link"> کالا دیجیتال</small> :''} 
+                 className="mute text-small small link">{getArticleCatParent(id, lang)}</small> :''} 
                 </h1>
                 <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
                     <Button onClick={() => router.push('/bussiness/categories/trash')} className="danger">ذباله دان</Button>
@@ -219,12 +208,18 @@ export default function Trash() {
             data?.data.map((item:any) => {
               return (
             <>
-                <Category 
+                <Category
                   title={item.title}
                   id={item.id}
                   uniqueId={item.uniqueId}
                   edithandle={(e:any) => onClickEditCatHandel(e)}
                   deletehandle={(e:any) => onClickDeleteCatHandel(e)}
+                  delIcon={<RiDeleteBin6Line />}
+                  delTool='حذف'
+                  langDelete={(l:string) => {
+                    setLangDelet(l)
+                    delLang(item.id)
+                  }}
                 />
                 <Divider sx={{margin:'7px'}}/>
             </>
@@ -407,6 +402,48 @@ export default function Trash() {
             </Button>
             <Button variant="solid" color="danger" onClick={() => handleNewCatSubmit()}>
               ثبت اطلاعات 
+            </Button>
+          </Box>
+        </ModalDialog>
+   </Modal>
+
+   <Modal open={ldopen}
+     onClose={() => {
+      setUnique('')
+      setLdopen(false);
+    }}
+    >
+        <ModalDialog
+          variant="outlined"
+          role="alertdialog"
+          aria-labelledby="alert-dialog-modal-title"
+          aria-describedby="alert-dialog-modal-description"
+        >
+          <Typography
+            id="alert-dialog-modal-title"
+            level="h2"
+            startDecorator={<RiFileWarningFill />}
+          >
+             ({langDelet})  حذف  محتوا
+          </Typography>
+          
+          <Typography component='h3' id="alert-dialog-modal-description" textColor="text.tertiary">
+            <b> شما در حال حذف یک محتوا با برچسب 
+                 ({langDelet})  
+                هستید،
+            </b>
+            جهت ادامه روند حذف روی دکمه تایید کلیک نمایید
+          
+          </Typography>
+          <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
+            زبان حذف شده دیگر قادر به بازیابی نیست.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
+            <Button variant="plain" color="neutral" onClick={() => setOpen(false)}>
+              انصراف
+            </Button>
+            <Button variant="solid" color="danger" onClick={() => handleDeleteLang()}>
+              تایید 
             </Button>
           </Box>
         </ModalDialog>

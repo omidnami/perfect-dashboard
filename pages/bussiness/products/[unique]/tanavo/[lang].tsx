@@ -8,8 +8,6 @@ import { Alert, AspectRatio, Box, Button, Card, CardOverflow, Chip, Divider, For
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { AiOutlineFontSize, AiOutlineLink, AiOutlineSearch } from "react-icons/ai";
-import { CKEditor, CKEditorContext } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import { HiCalendar, HiCreditCard, HiDevicePhoneMobile, HiDocumentText, HiEnvelope, HiFlag, HiGlobeAlt, HiKey, HiMap, HiPencil, HiPhone, HiUser } from "react-icons/hi2";
 import { ifError } from "assert";

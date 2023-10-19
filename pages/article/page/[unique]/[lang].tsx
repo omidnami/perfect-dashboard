@@ -78,7 +78,7 @@ export default function Store() {
         console.log(response);
         
         //edit
-        if (response && response.id) {
+        if (response && response?.id) {
             console.log(JSON.parse(response.options));
             const opt = JSON.parse(response.options);
             setHtnl(response.text??'')
@@ -158,9 +158,10 @@ export default function Store() {
         console.log(router.query.unique);
         
         const header = {
-            'lang': lang
+            'lang': router.query.lang
           }
               await postData(`article/page/select`,{unique:router.query.unique},header)
+              document.body.classList.remove('loading')
 
     }
 
@@ -215,7 +216,15 @@ export default function Store() {
           }
         await postData('plugins/text_view/select/detail',{},header)
     }
-
+    const handleProduct = async () => {
+        let header = { 
+            'Content-Type': 'multipart/form-data',
+            'lang': lang
+          }
+        await postData('plugins/product/one/all',{},header)
+        console.log('on product');
+        
+    }
 
     return (
     <main>
@@ -511,16 +520,19 @@ export default function Store() {
                         setSelectType([])
                         switch(s){
                         case"product":
-                            setSelectType(template.product_plugins)
+                            setSelectType(template.product_plugins || [])
+                            break;
+                        case"one_product":
+                            handleProduct()
                             break;
                         case"service":
-                            setSelectType(template.service_plugins)
+                            setSelectType(template.service_plugins || [])
                             break;
                         case"paralax":
                             setSelectType([])
                             break;
                         case"blog":
-                            setSelectType(template.blog_plugins)
+                            setSelectType(template.blog_plugins || [])
                             break;
                         case"text":
                         //to database
@@ -531,7 +543,7 @@ export default function Store() {
                             handleSlider()
                             break;
                         case"project":
-                            setSelectType(template.project_plugins)
+                            setSelectType(template.project_plugins || [])
                             break;
                         default:
                             setSelectType([])
@@ -547,6 +559,9 @@ export default function Store() {
                                 switch(v){
                                     case"product":
                                         title = 'نمایش کالا';
+                                        break;
+                                    case"one_product":
+                                        title = 'کالا تکی';
                                         break;
                                     case"service":
                                     title = 'نمایش خدمات';
@@ -644,13 +659,13 @@ export default function Store() {
             onClose={() => {return false}}
             >
             <ModalDialog>
-                <Typography>مقاله با موفقیت ایجاد شد</Typography>
+                <Typography>صفحه با موفقیت ایجاد شد</Typography>
                 <br/>
                 <Divider />
                 <br/>
                 <Button color="primary"
                 onClick={() => {
-                    router.push('/article/blog')
+                    router.push('/article/page')
                 }}
                 >لیست مقالات</Button>
                 <br/>

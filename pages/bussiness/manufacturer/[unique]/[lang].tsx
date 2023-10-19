@@ -32,7 +32,7 @@ const serverData:BrandInter = {
 }
 export default function Store() {
     const router = useRouter()
-    const [lang, setLang] = useState(localStorage.getItem('_lang_'))
+    const [lang, setLang] = useState<any>()
     const [unique, setUnique] = useState<string>()
     const [formData, setFormData] = useState(serverData)
     const [selectLang, setSelectLang] = useState<boolean>(true)
@@ -44,6 +44,9 @@ export default function Store() {
     const [tags, setTags] = useState<string[]>([])   
 
     useEffect(() => {
+        if (!lang) {
+            setLang(localStorage.getItem('_lang_'))
+        }
         console.log('router');
         setUnique(router.query.unique+'')        
         server()

@@ -187,8 +187,8 @@ export default function Gallery(props:any) {
                                 >
                                     <AspectRatio ratio="1" sx={{ width: 90 }}>
                                         <img
-                                            src={`${process.env.NEXT_PUBLIC_API_URL}${v.url}`}
-                                            srcSet={`${process.env.NEXT_PUBLIC_API_URL}${v.url}`}
+                                            src={`${process.env.NEXT_PUBLIC_UPLOAD_PATH}${v.url}`}
+                                            srcSet={`${process.env.NEXT_PUBLIC_UPLOAD_PATH}${v.url}`}
                                             loading="lazy"
                                             alt="" />
                                     </AspectRatio>
@@ -229,7 +229,7 @@ export default function Gallery(props:any) {
                                                     onClick={() => {
                                                         const c = document.getElementById(`id__${v.id}`)
                                                     c?c.innerText = 'کپی شد':''
-                                                    navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_API_URL}${v.url}`)
+                                                    navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_UPLOAD_PATH}${v.url}`)
                                                     
                                                     }}
                                                 >

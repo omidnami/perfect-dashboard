@@ -51,7 +51,7 @@ const menus = [
             {title:' خصوصیات',icone:<HiComputerDesktop />, link:'/bussiness/attribute',},
             {title:' کالا ها',icone:<HiComputerDesktop />, link:'/bussiness/products',},
             {title:' خدمات',icone:<HiComputerDesktop />, link:'/bussiness/services',},
-            {title:'پروژه ها',icone:<HiComputerDesktop />, link:'/bussiness/projects',},
+            {title:'پروژه ها',icone:<HiComputerDesktop />, link:'/bussiness/project',},
         ],
     },
     {

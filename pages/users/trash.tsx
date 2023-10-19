@@ -56,7 +56,7 @@ export default function Trash() {
   }
 
     return (
-        <main className='main'>
+        <main>
         <Menu />
         <Container>
             <Header />

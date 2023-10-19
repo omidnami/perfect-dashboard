@@ -1,23 +1,30 @@
 import Header from '@/Components/header'
 import Menu from '@/Components/menu'
-import { Avatar, Box, Card, CardActions, CardContent, CircularProgress, Grid, LinearProgress, List, ListItem, ListItemContent, ListItemDecorator, SvgIcon, Typography } from '@mui/joy'
+import { Avatar, Box, Card, CardActions, CardContent, CircularProgress, Divider, Grid, LinearProgress, List, ListItem, ListItemContent, ListItemDecorator, SvgIcon, Typography } from '@mui/joy'
 import { Line, Bar } from 'react-chartjs-2';
 import Container from '@/Layouts/Continer';
 import Chart from 'chart.js/auto';
 
 import {CategoryScale} from 'chart.js'; 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import useFetch from '@/Hooks/useFetch';
 Chart.register(CategoryScale);
 
 export default function Home() {
   const router = useRouter()
+  const [view, setView] = useState<any>({d1:0,d2:0,d3:0,d4:0,d5:0,d6:0,d7:0,d8:0,d9:0,d10:0,today:0,all:0})
+  const [social, setSocial] = useState<any>({})
+  const [comment, setComment] = useState<any[]>([])
+  
+  const {response, postData} = useFetch()
   const data = {
     labels: ['10 روز قبل', '9 روز قبل', '8 روز قبل', '7 روز قبل', '6 روز قبل', '5 روز قبل', '4 روز قبل', '3 روز قبل', '2 روز قبل', 'دیروز'],
+    
     datasets: [
       {
         label: 'بازدید کننده',
-        data: [14, 19, 3, 5, 2, 3, 3, 5, 2, 3],
+        data: [view.d10, view.d9, view.d8, view.d7, view.d6, view.d5, view.d4, view.d3, view.d2, view.d1],
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
           'rgba(54, 162, 235, 0.2)',
@@ -51,13 +58,25 @@ export default function Home() {
     maintainAspectRatio: false,
     responsive: true,
     width: '100%',
-    height: 500
+    height: 500 
   };
+
   useEffect(() => {
-    document.body.classList.remove('loading')
+    postData('dashboard/default',null)
   },[])
+
+  useEffect(() => {
+    if (response) {
+      setView(response.view)
+      setSocial(response.social)
+      setComment(response.comment)
+    }
+        document.body.classList.remove('loading')
+
+  }, [response])
+
   return (
-    <main className='main'>
+    <main>
       <Menu />
       <Container>
           <Header />
@@ -72,12 +91,12 @@ export default function Home() {
               <Grid xs={12} sm={12} md={4} lg={4}>
               <Card className='mb-2' variant="solid" color="primary" invertedColors>
                   <CardContent orientation="horizontal">
-                    <CircularProgress size="lg" determinate value={100}>
+                    {/* <CircularProgress size="lg" determinate value={100}>
                       100+
-                    </CircularProgress>
+                    </CircularProgress> */}
                     <CardContent>
                       <Typography level="body-md">بازدید امروز</Typography>
-                      <Typography level="h2" sx={{textAlign:'left'}}> 160 نفر </Typography>
+                      <Typography level="h2" sx={{textAlign:'left'}}> {view.today} نفر </Typography>
                     </CardContent>
                   </CardContent>
                   <CardActions>
@@ -85,12 +104,12 @@ export default function Home() {
               </Card>  
               <Card className='mb-2' variant="solid" color="primary" invertedColors>
                   <CardContent orientation="horizontal">
-                    <CircularProgress size="lg" determinate value={100}>
+                    {/* <CircularProgress size="lg" determinate value={100}>
                       100+
-                    </CircularProgress>
+                    </CircularProgress> */}
                     <CardContent>
-                      <Typography level="body-md">بازدید امروز</Typography>
-                      <Typography level="h2" sx={{textAlign:'left'}}> 160 نفر </Typography>
+                      <Typography level="body-md">بازدید کل</Typography>
+                      <Typography level="h2" sx={{textAlign:'left'}}> {view.all} نفر </Typography>
                     </CardContent>
                   </CardContent>
                   <CardActions>
@@ -99,12 +118,52 @@ export default function Home() {
               </Grid> 
 
               <Grid xs={12} sm={12} md={8} lg={8}>
-                <Card className="card">
-                  <Bar data={data} style={{width:'100%', height:'500px'}}/>
+              <Card className="card"
+              >
+                <h3>آخرین دیدگاه ها</h3>
+                <Divider />
+                <div
+                              style={{minHeight:'500px', maxHeight:'500px', overflow:'auto'}}
+
+                >
+
+                  {
+                    comment.map((v:any) => {
+                      return (
+                        <>
+                              <List
+                                aria-labelledby="ellipsis-list-demo"
+                                sx={{ '--ListItemDecorator-size': '56px' }}
+                              >
+                                <ListItem>
+                                  <ListItemDecorator>
+                                    <Avatar src="/static/images/avatar/1.jpg" />
+                                  </ListItemDecorator>
+                                  <ListItemContent>
+                                    <Typography level="title-sm">{v.user.fname +' '+ v.user.lname}</Typography>
+                                    <Typography level="body-sm" noWrap>
+                                      {v.comment}
+                                    </Typography>
+                                  </ListItemContent>
+                                </ListItem>
+                                </List>
+                        </>
+                      )
+                    })
+                  }
+                                  </div>
+
                 </Card>
               </Grid> 
               <Grid xs={12} sm={12} md={4} lg={4}>
-                <Card className="card">
+                <Card className="card"
+                >
+                                  <h3>آخرین دیدگاه ها</h3>
+                <Divider />
+                <div
+                                              style={{minHeight:'500px', maxHeight:'500px', overflow:'auto'}}
+
+                                              >
                 <Box sx={{ direction:'ltr'}}>
                   <Typography
                     id="ellipsis-list-demo"
@@ -122,9 +181,9 @@ export default function Home() {
                         <Avatar src="/static/images/avatar/1.jpg" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Any url (25%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={25} /> 
+                        <Typography component='div' level="title-sm">Any url ({social?.any}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.any} /> 
 
                         </Typography>
                       </ListItemContent>
@@ -135,9 +194,9 @@ export default function Home() {
                         <Avatar src="/New-Google-Logo.jpg" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Google (25%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={25} /> 
+                        <Typography component='div' level="title-sm">Google ({social?.google}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.google} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
@@ -147,9 +206,9 @@ export default function Home() {
                         <Avatar src="/modern-badge-logo-instagram-icon_578229-124.avif" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Instagram (25%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={25} /> 
+                        <Typography component='div' level="title-sm">Instagram ({social?.instagram}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.instagram} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
@@ -159,9 +218,9 @@ export default function Home() {
                         <Avatar src="/facebook.png" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Facebook (25%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={25} /> 
+                        <Typography component='div' level="title-sm">Facebook ({social?.facebook}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.facebook} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
@@ -171,9 +230,9 @@ export default function Home() {
                         <Avatar src="/twitter-logo-5.png" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Twitter (25%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={25} /> 
+                        <Typography component='div' level="title-sm">Twitter ({social?.twitter}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.twitter} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
@@ -183,9 +242,9 @@ export default function Home() {
                         <Avatar src="/linkedin-logo.png" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Linkedin (42%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={42} /> 
+                        <Typography component='div' level="title-sm">Linkedin ({social?.linkedin}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.linkedin} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
@@ -195,9 +254,9 @@ export default function Home() {
                         <Avatar src="/youtube.png" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">Youtube (12%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={12} /> 
+                        <Typography component='div' level="title-sm">Youtube ({social?.youtube}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.youtube} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
@@ -207,21 +266,45 @@ export default function Home() {
                         <Avatar src="/static/images/avatar/2.jpg" />
                       </ListItemDecorator>
                       <ListItemContent>
-                        <Typography level="title-sm">other (25%)</Typography>
-                        <Typography level="body-sm" noWrap>
-                        <LinearProgress determinate value={25} /> 
+                        <Typography component='div' level="title-sm">other ({social?.other}%)</Typography>
+                        <Typography component='div' level="body-sm" noWrap>
+                        <LinearProgress determinate value={social?.other} /> 
                         </Typography>
                       </ListItemContent>
                     </ListItem>
                   </List>
                 </Box>
+                </div>
                 </Card>
               </Grid>
 
               <Grid xs={12}>
-                <Card className="card">
-                  <Bar data={data} style={{width:'100%', height:'500px'}}/>
-                </Card>
+                {/* <Card className="card">
+                  {
+                    comment.map((v:any) => {
+                      return (
+                        <>
+                              <List
+                                aria-labelledby="ellipsis-list-demo"
+                                sx={{ '--ListItemDecorator-size': '56px' }}
+                              >
+                                <ListItem>
+                                  <ListItemDecorator>
+                                    <Avatar src="/static/images/avatar/1.jpg" />
+                                  </ListItemDecorator>
+                                  <ListItemContent>
+                                    <Typography level="title-sm">Brunch this weekend?</Typography>
+                                    <Typography level="body-sm" noWrap>
+                                      I&apos;ll be in your neighborhood doing errands this Tuesday.
+                                    </Typography>
+                                  </ListItemContent>
+                                </ListItem>
+                                </List>
+                        </>
+                      )
+                    })
+                  }
+                </Card> */}
               </Grid> 
             </Grid>
             

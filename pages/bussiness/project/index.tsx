@@ -1,22 +1,16 @@
 import Header from "@/Components/header";
 import Category from "@/Components/listItem/categury";
 import Manufacturer from "@/Components/listItem/manufactur";
-import Product from "@/Components/listItem/product";
 import Menu from "@/Components/menu";
 import useFetch from "@/Hooks/useFetch";
 import Container from "@/Layouts/Continer";
-import { Box, Button, Card, CircularProgress, Divider, Grid, Modal, ModalDialog, Typography } from "@mui/joy";
-import { FormControlLabel, Pagination, Switch } from "@mui/material";
+import { Box, Button, Card, CircularProgress, Divider, Modal, ModalDialog, Typography } from "@mui/joy";
+import { Pagination } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { RiDeleteBin6Line, RiFileWarningFill } from "react-icons/ri";
 
-const serverSetting = {
-  appl:false,
-  comments: true,
-  faq: true,
-}
-export default function Services() {
+export default function Project() {
     const router = useRouter()
 
     const [data, setData] = useState<any>(null)
@@ -28,9 +22,6 @@ export default function Services() {
     const [langDelet, setLangDelet] = useState<any>('')
     const [ldopen, setLdopen] = useState<boolean>(false)
     const [langDeletId, setLangDeletId] = useState<any>(0)
-    const [settingOpen, setSettingOpen] = useState<any>(false)
-
-    const [setting, setSetting] = useState(serverSetting)
 
     //onmund
     useEffect(() => {
@@ -40,7 +31,7 @@ export default function Services() {
         const header = {
             'lang': localStorage.getItem('_lang_')
           }
-        postData(`service/select/?page=${page}`,null,header)
+        postData(`project/select/?page=${page}`,null,header)
     }, [router])
 
     useEffect(() => {
@@ -50,9 +41,6 @@ export default function Services() {
             setData(response)
           }
 
-          if (!response?.data?.length) {
-            document?.body.classList.remove('loading')
-          }
     
           if (response?.status) {
             router.push(`?page=${page}`)
@@ -61,8 +49,10 @@ export default function Services() {
             const header = {
                 'lang': localStorage.getItem('_lang_')
               }
-            postData(`service/select/?page=${page}`,null,header)
+            postData(`project/select/?page=${page}`,null,header)
           }
+          document?.body.classList.remove('loading')
+
     }, [response])
 
     //onLoad data
@@ -70,13 +60,12 @@ export default function Services() {
         document.body.classList.remove('loading')
     }, [data])
     
-
     //actions
 
-    const handleDeleteProduct = () => {
+    const handleDeleteCat = () => {
         if (unique) {
             document.body.classList.add('loading')
-            postData('service/delete',{unique:unique})
+            postData('project/delete',{unique:unique})
           }
     }
     const deleteItem = (id:string) => {
@@ -107,55 +96,33 @@ export default function Services() {
     const handleDeleteLang = () => {
       if (langDeletId) {
         document.body.classList.add('loading')
-        postData('service/delete_lang',{id:langDeletId})
+        postData('project/delete_lang',{id:langDeletId})
       }
     }
 
-    const handleSettingSubmit = () => {      
-      postData('service/set_settings',{unique:unique,settings:setting},null)
-      setUnique('')
-      setSettingOpen(false)
-    }
-
-    const handleCloseDetting = () => {
-      setUnique('')
-      setSettingOpen(false)
-      setSetting(serverSetting)
-    }
-
-    const handleOpenSetting = (u:any) => {
-      setUnique(u)
-      let d = data.data.filter((e: { uniqueId: any; }) => e.uniqueId === u)
-      d = d[0]
-      setSetting(JSON.parse(d.settings))
-      setSettingOpen(true)
-      console.log(JSON.parse(d.settings));
-    }
-
-    return(
+    return (
         <main>
-        <Menu />
-        <Container>
-            <Header />
-            <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}> لیست کالا ها</h1>
-            <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
-                <Button onClick={() => router.push('/bussiness/services/trash')} className="danger">ذباله دان</Button>
-                <Button onClick={() => router.push('/bussiness/services/insert/'+lang)} className="primary">ایجاد کالا</Button>
-            </div>
-            <div style={{clear:'both'}}></div>
-
-            {
+            <Menu />
+            <Container>
+                <Header />
+                <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}>پروژه ها</h1>
+                <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
+                    <Button onClick={() => router.push('/project/manufacturer/trash')} className="danger">ذباله دان</Button>
+                    <Button onClick={() => router.push('/project/manufacturer/insert/'+lang)} className="primary">ایجاد پروژه</Button>
+                </div>
+                <div style={{clear:'both'}}></div>
+        {
                     !data?
-                    <p style={{textAlign:'center'}}>داده ای وجود ندارد</p>
+                    <p>data loading</p>
                     :
                     data?.data.map((item:any) => {
                   return (
             <>
-                <Product 
+                <Manufacturer 
                   title={item.title}
                   id={item.id}
                   uniqueId={item.uniqueId}
-                  edithandle={(e:any) => router.push('/bussiness/services/'+item.uniqueId+'/'+item.lang)}
+                  edithandle={(e:any) => router.push('/bussiness/manufacturer/'+item.uniqueId+'/fa')}
                   deletehandle={(e:any) => onClickDeleteHandel(e)}
                   delIcon={<RiDeleteBin6Line />}
                   delTool='حذف'
@@ -163,24 +130,22 @@ export default function Services() {
                     setLangDelet(l)
                     delLang(item.id)
                   }}
-                  lang={item.lang}
-                  clicked={(u:any) => handleOpenSetting(u)}
                 />
                 <Divider sx={{margin:'7px'}}/>
             </>
               )
             })
         }
-    {data&&<Card className='card'>
-    <Pagination 
+            </Container>
+
+            {data&&<Card className='card'>
+      <Pagination 
       count={data?Math.ceil(data.total/data.per_page):0} 
       size="large"
       page={page} 
       onChange={(e,v) => handleChange(e,v)}
       />
     </Card>}
-            </Container>
-
     
 
     <Modal open={open}
@@ -200,20 +165,20 @@ export default function Services() {
             level="h2"
             startDecorator={<RiFileWarningFill />}
           >
-             ({`ID: ${unique}`})  حذف  کالا
+             ({`ID: ${unique}`})  حذف تولید کننده
           </Typography>
           
           <Typography component='h3' id="alert-dialog-modal-description" textColor="text.tertiary">
             جهت ادامه روند حذف روی دکمه تایید کلیک نمایید
           </Typography>
           <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
-            با حذف  کالا امکان غیر فعال شدن تمامی محتوا وابسته به این مورد وجود دارد.
+            با حذف تولید کننده امکان غیر فعال شدن تمامی محتوا وابسته به این مورد وجود دارد.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
             <Button variant="plain" color="neutral" onClick={() => setOpen(false)}>
               انصراف
             </Button>
-            <Button variant="solid" color="danger" onClick={() => handleDeleteProduct()}>
+            <Button variant="solid" color="danger" onClick={() => handleDeleteCat()}>
               تایید 
             </Button>
           </Box>
@@ -250,79 +215,13 @@ export default function Services() {
           
           </Typography>
           <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
-            حذف کالا با زبان مد نظر باعث میشود کالا در این زبان به صورت کامل حذف گردد و دیگر قادر به بازیابی ان نیستید!
+            زبان حذف شده دیگر قادر به بازیابی نیست.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
             <Button variant="plain" color="neutral" onClick={() => setOpen(false)}>
               انصراف
             </Button>
             <Button variant="solid" color="danger" onClick={() => handleDeleteLang()}>
-              تایید 
-            </Button>
-          </Box>
-        </ModalDialog>
-   </Modal>
-
-
-   <Modal open={settingOpen}
-     onClose={() => handleCloseDetting()}
-    >
-        <ModalDialog
-          variant="outlined"
-          role="alertdialog"
-          aria-labelledby="alert-dialog-modal-title"
-          aria-describedby="alert-dialog-modal-description"
-          className='modal-omid'
-        >
-          <Typography
-            id="alert-dialog-modal-title"
-            level="h2"
-            startDecorator={<RiFileWarningFill />}
-          >
-             تنظیمات پیشرفته
-          </Typography>
-          <Grid container >
-
-                <Grid xs={12}>
-                    <Box component='div'>
-                    <br />
-                    <FormControlLabel
-                    sx={{marginTop:2}}
-                    control={<Switch defaultChecked 
-                        checked={setting.appl}
-                        onChange={() => setSetting({...setting,appl:!setting.appl})}
-                    sx={{direction:'ltr'}} />} label="نمایش فقط اپ موبایل" />                    </Box>
-                </Grid>
-                <Grid xs={12}>
-                    <Box component='div'>
-                    <br />
-                    <FormControlLabel
-                    sx={{marginTop:2}}
-                    control={<Switch defaultChecked 
-                        checked={setting.comments}
-                        onChange={() => {
-                          setSetting({...setting,comments:!setting.comments})}
-                        }
-                    sx={{direction:'ltr'}} />} label="نمایش کامنت ها" />                    </Box>
-                </Grid>
-                <Grid xs={12}>
-                    <Box component='div'>
-                    <br />
-                    <FormControlLabel
-                    sx={{marginTop:2}}
-                    control={<Switch defaultChecked 
-                        checked={setting.faq}
-                        onChange={() => setSetting({...setting,faq:!setting.faq})}
-                    sx={{direction:'ltr'}} />} label="نمایش پرسش و پاسخ" />                    </Box>
-                </Grid>
-          </Grid>
-          
-          
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
-            <Button variant="plain" color="neutral" onClick={() => handleCloseDetting()}>
-              انصراف
-            </Button>
-            <Button variant="solid" color="danger" onClick={() => handleSettingSubmit()}>
               تایید 
             </Button>
           </Box>

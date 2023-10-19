@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FormControlLabel } from "@mui/material";
 import { useRouter } from "next/router";
 import Cat from "./cat";
+import Lang from "../lang";
 
 const data = {
     orginal:true,
@@ -29,6 +30,7 @@ export default function Detail(props:any) {
     const [cats, setCats] = useState<any[]>([])
     const [brands, setBrands] = useState<any[]>([])
     const [brandTitle, setBrandTitle] = useState('')
+    const [modelText, setModelText] = useState('مدل')
 
     useEffect(() => {
         
@@ -38,6 +40,17 @@ export default function Detail(props:any) {
 
         server(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/brand/select_detail`,'brand')
                     window.scrollTo(0, 500);
+
+                    if (props.lang === 'EN') {
+                        setModelText('model')
+                    }else if (props.lang === 'FA') {
+                        setModelText('مدل')
+                    }else if (props.lang === 'AR') {
+                        setModelText('سری')
+                    }else {
+                        setModelText('')
+                    }
+
     },[route])
 
     useEffect(() => {
@@ -187,7 +200,7 @@ export default function Detail(props:any) {
                         value={formData.model}
                         onChange={(e) => {
                             let v = e.target.value
-                            let t = `${props.mainCat} ${brandTitle} مدل ${v}`
+                            let t = `${props.mainCat} ${brandTitle} ${modelText} ${v}`
                             setFormData({...formData,model:v,title:t})
 
                         }}

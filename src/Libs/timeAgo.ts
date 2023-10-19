@@ -13,7 +13,9 @@ export default  function __timeAgo(value:any) {
 }
 
 function ago(value:any) {
-
+    if(typeof value !== 'string'){
+        value =  Date.parse(value)
+    }
     const seconds = Math.floor((value - Math.floor(Date.now()/1000)));
     if (seconds < 29) // less than 30 seconds ago will show as 'Just now'
             return 'لحظاتی بعد';

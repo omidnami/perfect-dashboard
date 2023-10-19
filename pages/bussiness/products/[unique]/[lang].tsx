@@ -145,7 +145,7 @@ export default function Store() {
         const header = {
           'lang': lang
         }
-            await postData(`product/store`,{cat:cat},header)
+            await postData(`product/store`,{cat:cat, mainCat:mainCat},header)
 
       }
 
@@ -378,8 +378,8 @@ export default function Store() {
             <Button variant="plain" color="neutral" onClick={() => alert(1)}>
               قیمت گذاری
             </Button>
-            <Button variant="solid" color="primary" onClick={() => alert(1)}>
-              تنظیمات پیشرفته 
+            <Button variant="solid" color="primary" onClick={() => router.push('/bussiness/products')}>
+              لیست کالا ها 
             </Button>
             <Button variant="solid" color="primary" onClick={() => {
               resetComponent()

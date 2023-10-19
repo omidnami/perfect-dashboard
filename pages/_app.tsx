@@ -56,10 +56,12 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             const config = await react.json()
             setDataConf(config)
             //get them
-
-              const them = await fetcher('https://rasamlift.com/conf.json')
-              
-              setTemplate(them)
+            
+            
+            const them = await fetcher(config.domain+'conf.json')
+            
+            setTemplate(them)
+            console.log(them);
             
           })
           .catch(e => {

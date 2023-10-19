@@ -14,7 +14,8 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: right;
-    padding-inline-start: 260px;
+    width: 78.5vw;
+    float: left;
 }
 
 .menu {
@@ -99,10 +100,10 @@ button.primary:hover,.btn-primary:hover {
     }
 }
 
-.css-1m7hcep-JoyInput-root,.MuiTextarea-root,.ck,.MuiSelect-root {
+.css-1m7hcep-JoyInput-root,.MuiTextarea-root,.ck,.MuiSelect-root, .muiInput-root {
     background: #21293600 !important;
-    border-color: #a0a0a082;
-    color: gray;
+    border-color: #6565652b !important;
+    color: gray !important;
 }
 .MuiListItemDecorator-root {
     padding-left: 11px;
@@ -116,6 +117,8 @@ button.primary:hover,.btn-primary:hover {
     border-color: var(--ck-color-base-border);
     min-height: 200px;
 }
+
+
 
 
 

@@ -57,7 +57,7 @@ export default function Users() {
   }
 
     return (
-        <main className='main'>
+        <main>
         <Menu />
         <Container>
             <Header />

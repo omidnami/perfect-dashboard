@@ -334,7 +334,7 @@ export default function Cat(props:any) {
                 </Grid>
             </Grid>
             <Card
-                sx={{padding:20, marginTop:3,position:'relative'}}
+                sx={{padding:'20px', marginTop:3,position:'relative'}}
                 className='card'
             >
                 <List orientation="horizontal" style={{float:'right'}}>

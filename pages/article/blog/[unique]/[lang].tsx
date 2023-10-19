@@ -63,7 +63,7 @@ export default function Store() {
         console.log(status);
         
         //edit
-        if (response && response.id) {
+        if (response && response?.id) {
 
             setFormData({
                 ...response,
@@ -72,7 +72,7 @@ export default function Store() {
             })
 
             if (response.url) {
-                setFileLoad(`${process.env.NEXT_PUBLIC_API_URL}${response.url}`)
+                setFileLoad(`${process.env.NEXT_PUBLIC_UPLOAD_PATH}${response.url}`)
             }else {
                 setFileLoad('')
             }

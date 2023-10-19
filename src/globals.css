@@ -101,7 +101,7 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
-body.loading0::after {
+body.loading::after {
   content: '';
   z-index: 888888;
     position: fixed;

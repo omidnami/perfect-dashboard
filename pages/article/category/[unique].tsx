@@ -33,6 +33,7 @@ export default function Cat() {
     const [langDelet, setLangDelet] = useState<any>('')
     const [ldopen, setLdopen] = useState<boolean>(false)
     const [langDeletId, setLangDeletId] = useState<any>(0)
+    
     useEffect(() => {
       setData({data:[],total:0,per_page:10,current_page:1})
       if (router.query.unique) {
