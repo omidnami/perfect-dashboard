@@ -4,7 +4,7 @@ import Lang from "@/Components/lang";
 import Menu from "@/Components/menu";
 import useFetch from "@/Hooks/useFetch";
 import Container from "@/Layouts/Continer";
-import { AspectRatio, Avatar, Box, Button, Card, Checkbox, Chip, Divider, FormLabel, Grid, Input, ListDivider, ListItemDecorator, Modal, ModalDialog, Radio, Textarea, Typography } from "@mui/joy";
+import { AspectRatio, Avatar, Box, Button, Card, Checkbox, Chip, Divider, FormLabel, Input, ListDivider, ListItemDecorator, Modal, ModalDialog, Radio, Textarea, Typography } from "@mui/joy";
 import { List as ListItem } from "@mui/joy";
 import { useRouter } from "next/router";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -17,6 +17,19 @@ import { GrAdd, GrClose } from "react-icons/gr";
 import List from "..";
 import ConfContext from "@/Context/ConfConext";
 import Link from "next/link";
+import { EditorState } from 'draft-js';
+import dynamic from 'next/dynamic';
+import { editorStateFromRaw, editorStateToRaw } from '@/Libs/fa';
+
+// import CKeditor from "@/Components/editor/CkEditor";
+
+
+// import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import Head from "next/head";
+import { Grid } from "@mui/material";
+
+const CKeditor = dynamic(() => import("@/Components/editor/CkEditor"), { ssr: false });
 interface BrandInter {
     title:string,
     text:string,
@@ -51,12 +64,19 @@ export default function Store() {
     const [open, setOpen] = useState<boolean>(false)
     const [success, setSuccess] = useState<boolean>(false)
     const [catsList, setCatsList] = useState<any[]>([])
+    const [editorLoaded, setEditorLoaded] = useState(false);
+    const [data, setData] = useState("");
 
+    useEffect(() => {
+    }, []);
+    
     useEffect(() => {
         setUnique(router.query.unique)
         setLang(router.query.lang)
-                
+        
         server()
+        
+        setEditorLoaded(true);
     } ,[router])
 
     useEffect(() => {
@@ -70,6 +90,7 @@ export default function Store() {
                 desc: response.meta_description,
                 cat: JSON.parse(response.cat)
             })
+            setData(response.text || '')
 
             if (response.url) {
                 setFileLoad(`${process.env.NEXT_PUBLIC_UPLOAD_PATH}${response.url}`)
@@ -97,6 +118,11 @@ export default function Store() {
 
         }
         //handle error
+        else if(unique !== 'insert' && !response?.id){
+            setSelectLang(false)
+
+        }
+
         else if(status === 100){
 
         }
@@ -104,8 +130,8 @@ export default function Store() {
         else {
             //404
             setFormData(serverData)
-
-            setSelectLang(false)
+            setData('')
+            setSelectLang(true)
             setFileLoad('')
             setFile(undefined)
             setTags([])
@@ -150,13 +176,13 @@ export default function Store() {
           'Content-Type': 'multipart/form-data',
           'lang': lang
         }
-        
-        const data = {...formData,file:file,meta_key:JSON.stringify(tags)}
+
+        const dataForm = {...formData,file:file,meta_key:JSON.stringify(tags),text:data}
   
         if (unique && unique !== 'insert' && !selectLang) {
-          await postData('article/blog/update',{...data,unique:unique}, header)
+          await postData('article/blog/update',{...dataForm,unique:unique}, header)
         }else {
-          await postData('article/blog/insert',data, header)
+          await postData('article/blog/insert',dataForm, header)
         }
 
     }
@@ -179,7 +205,6 @@ export default function Store() {
 
     const handleCatToCat = (cat:string) => {
         console.log(cat);
-        
         // push uniqueid to cat data array
         const c =  formData.cat.filter(e=> e === cat)
         if (c.length) {
@@ -192,15 +217,43 @@ export default function Store() {
             setFormData({...formData,cat:ci})
 
         }
-
-
     }
+
+    const handleImageUpload = async (file:any) => {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('dir', 'blog_post');
+    
+          const response = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/v1/upload', {
+            method: 'POST',
+            body: formData,
+          });
+    
+          if (response.ok) {
+            
+            const imageUrl = await response.text();
+            const url = process.env.NEXT_PUBLIC_UPLOAD_PATH+JSON.parse(imageUrl).url
+            const imgElement = `<img src="${url}" alt="Uploaded Image" />`;
+            setData(data + imgElement);
+          }else{
+            alert('تصویر بارگذاری نشد')
+          }
+        } catch (error) {
+          console.error('Image upload failed:', error);
+        }
+      };
+    
     return (
+        <>
+        <Head>
+            <title>{!selectLang?'ویرایش مقاله':'ایجاد مقاله'}</title>
+        </Head>
     <main>
         <Menu />
         <Container>
             <Header />
-            <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'60%',float:'right'}}>{!selectLang?'ویرایش تولید کننده':'ایجاد تولید کننده'}</h1>
+            <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'60%',float:'right'}}>{!selectLang?'ویرایش مقاله':'ایجاد مقاله'}</h1>
             <div style={{marginTop:'25px',marginBottom:'25px',width:'40%',float:'left'}}>
                     <Lang style={{
                             width:'100%',
@@ -215,7 +268,7 @@ export default function Store() {
             <Box component='section' width={'100%'}>
                 <Grid container columnSpacing={1}>
                     
-                <Grid sm={12} md={8}>
+                <Grid sm={12} md={12}>
                     <Card className="card">
                         <h3>اطلاعات پایه</h3>
                         <Divider />
@@ -275,34 +328,27 @@ export default function Store() {
                                     <FormLabel>
                                         <span> اطلاعات تکمیلی</span>
                                     </FormLabel>
-                                    <Textarea
-                                        sx={{
-                                            width:'100%'
-                                        }}
-                                        minRows={8}
-                                        size="lg"
-                                        value={formData.text}
-                                        onChange={(e) => {
-                                            setFormData({...formData,text:e.target.value})
-                                        }}  
-                                        />
-                                        
+                                    <div>
+                                                <CKeditor
+                                                    editorLoaded={editorLoaded}
+                                                    value={data}
+                                                    onChange={(e: any) => setData(e)} name={""}               
+                                                />
+                                    </div>
                                 </Grid>
                             </Grid>
-                            <Card className="card" sx={{marginTop:'10px'}}>
-                {response?.message&&<span className="err">{response?.message}</span>}
-                {response?.status&&<span className="success">{response?.msg}</span>}
-                    <Button onClick={()=> onClickHandleFormData()
-                    } className="primary">ثبت اطلاعات</Button>                    
-                </Card>
+ 
                     </Card>
 
 
                 </Grid>
-
-                <Grid sm={12} md={4}>
-                <Card className="card" variant="outlined">
-                    <h3>اطلاعات سیو</h3>
+                    <p><br/></p>
+                <Grid sm={12} md={12}>
+                        <Card className="card" variant="outlined">
+                    <Grid container spacing={1.5}>
+                        <Grid xs={12} sm={12} md={6} lg={6}>
+                            <div style={{padding:'12px'}}>
+                                                <h3>اطلاعات سئو</h3>
                     <Divider />
                     <AspectRatio minHeight="120px">
                             <img
@@ -324,7 +370,10 @@ export default function Store() {
                     }}
                     />
                     </label> 
-                    {response?.errors?.file&&<span className="err">{response?.errors?.file}</span>}
+                    </div>
+                        </Grid>
+                        <Grid xs={12} sm={12} md={6} lg={6} sx={{paddingTop:3,paddingBottom:3}}>
+                        {response?.errors?.file&&<span className="err">{response?.errors?.file}</span>}
                         <FormLabel>
                         <span>  توضیحات متا<small className="text-danger pr-1"></small></span> 
 
@@ -384,10 +433,21 @@ export default function Store() {
                         <div style={{marginTop:'25px'}}>
                             {/* <Button className="primary" type="submit">ثبت اطلاعات کاربری</Button> */}
                         </div>
+                        </Grid>
+                    </Grid>
+
+
                 </Card>
                 </Grid>
             </Grid>
             </Box>
+            <p><br/></p>
+            <Card className="card" sx={{marginTop:'10px'}}>
+                {response?.message&&<span className="err">{response?.message}</span>}
+                {response?.status&&<span className="success">{response?.msg}</span>}
+                    <Button onClick={()=> onClickHandleFormData()
+                    } className="primary">ثبت اطلاعات</Button>                    
+                </Card>
         </Container>
 
         <Modal
@@ -490,5 +550,6 @@ export default function Store() {
             </ModalDialog>
             </Modal>
     </main>  
+        </>
     )
 }

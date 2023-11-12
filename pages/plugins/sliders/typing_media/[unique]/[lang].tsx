@@ -64,11 +64,11 @@ export default function Slider() {
             const m = response.files.filter((e: { def: number; })=> e.def === 0);
             const d = response.files.filter((e: { def: number; })=> e.def === 1);
             if (m.length) {
-                setFileLoadMobile(process.env.NEXT_PUBLIC_API_URL+m[0].url)
+                setFileLoadMobile(process.env.NEXT_PUBLIC_UPLOAD_PATH+m[0].url)
                 
             }
             if (d.length) {
-                setFileLoad(process.env.NEXT_PUBLIC_API_URL+d[0].url)
+                setFileLoad(process.env.NEXT_PUBLIC_UPLOAD_PATH+d[0].url)
                 
             }            
         }
@@ -95,6 +95,8 @@ export default function Slider() {
             console.log(data);
             
               await postData('plugins/slider/insert',data, header)
+              document.body.classList.remove('loading')
+
         }
         const onEditSlider = (unique:any) => {}
         const onDeleteSlider = (i:any) => {
@@ -280,6 +282,8 @@ export default function Slider() {
                                     sx={{marginTop:4}}
                                     onClick={() => {
                                         setDynamic([...dynamic,textDynamic,delay])
+                                        setDlay(0)
+                                        setTextDynamic('')
                                         
                                     }}
                                     >

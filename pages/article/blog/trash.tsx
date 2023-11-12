@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { RiFileWarningFill } from "react-icons/ri";
 import { GrPowerReset } from "react-icons/gr";
+import Blog from "@/Components/listItem/blog";
 
 export default function Trash() {
     const router = useRouter()
@@ -24,13 +25,14 @@ export default function Trash() {
 
     //onmund
     useEffect(() => {
+      setData(null)
         if (!lang) {
             setLang(localStorage.getItem('_lang_'))
         }
         const header = {
             'lang': localStorage.getItem('_lang_')
           }
-        postData(`brand/select/0?page=${page}`,null,header)
+        postData(`article/blog/trash/?page=${page}`,null,header)
     }, [router])
 
     useEffect(() => {
@@ -46,8 +48,9 @@ export default function Trash() {
             const header = {
                 'lang': localStorage.getItem('_lang_')
               }
-            postData(`brand/select/0?page=${page}`,null,header)
+            postData(`article/blog/trash/?page=${page}`,null,header)
           }
+          document.body.classList.remove('loading')
     }, [response])
 
     //onLoad data
@@ -60,7 +63,7 @@ export default function Trash() {
     const handleDeleteCat = () => {
         if (unique) {
             document.body.classList.add('loading')
-            postData('brand/delete',{unique:unique})
+            postData('article/blog/delete',{unique:unique})
           }
     }
     const deleteItem = (id:string) => {
@@ -88,9 +91,9 @@ export default function Trash() {
             <Menu />
             <Container>
                 <Header />
-                <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}>تولید کنندگان</h1>
+                <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}>ذباله دان مقاله</h1>
                 <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
-                    <Button onClick={() => router.push('/bussiness/manufacturer')} className="primary"> بازگشت به تولیدکننده</Button>
+                    <Button onClick={() => router.push('/article/blog')} className="primary"> بازگشت لیست مقالات</Button>
                 </div>
                 <div style={{clear:'both'}}></div>
         {
@@ -100,7 +103,7 @@ export default function Trash() {
                     data?.data.map((item:any) => {
                   return (
             <>
-                <Manufacturer 
+                <Blog 
                   title={item.title}
                   id={item.id}
                   uniqueId={item.uniqueId}

@@ -58,10 +58,10 @@ button.primary:hover,.btn-primary:hover {
 }
 
 .menu nav ul li:hover, .menu nav ul li div:hover {
-    background-color: #33353a !important;
+    background-color: rgba(97, 97, 97, 0.358) !important;
 }
 .menu nav ul li:hover {
-    background-color: rgb(54, 24, 68) !important;
+    background-color: rgba(97, 97, 97, 0.358) !important;
 }
 
 .sub-menu {
@@ -100,7 +100,7 @@ button.primary:hover,.btn-primary:hover {
     }
 }
 
-.css-1m7hcep-JoyInput-root,.MuiTextarea-root,.ck,.MuiSelect-root, .muiInput-root {
+.css-1m7hcep-JoyInput-root,.MuiTextarea-root,.MuiSelect-root, .muiInput-root {
     background: #21293600 !important;
     border-color: #6565652b !important;
     color: gray !important;
@@ -117,11 +117,34 @@ button.primary:hover,.btn-primary:hover {
     border-color: var(--ck-color-base-border);
     min-height: 200px;
 }
+.ck p, .ck span, .ck h1, .ck h2, .ck h3, .ck h4, .ck h5, .ck h6 {
+    color: gray !important;
+}
+.small-loading {
+    width: 80px;
+    height: 25px;
+    position: relative;
+}
+.small-loading::after{
+    content: '';
+    position: absolute;
+    height: 25px;
+    width: 5px;
+    background-color: gray;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    animation: omid infinite 1s;
 
+}
+@keyframes omid {
+    from {
+        opacity: 1;
+        right: 0;
+    }
 
-
-
-
-
-
-
+    to {
+        opacity: 0;
+        right:80px;
+    }
+}

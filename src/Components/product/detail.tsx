@@ -7,6 +7,9 @@ import { FormControlLabel } from "@mui/material";
 import { useRouter } from "next/router";
 import Cat from "./cat";
 import Lang from "../lang";
+import dynamic from "next/dynamic";
+
+const CKeditor = dynamic(() => import("@/Components/editor/CkEditor"), { ssr: false });
 
 const data = {
     orginal:true,
@@ -18,7 +21,7 @@ const data = {
     wtype:'گرم',
     atype:'سانتیمتر',
     box:{l:'0',v:'0',h:'0',w:'0'},
-    text:'',
+    text:'<p></p>',
     zaf:'',
     ghovat:''
 }
@@ -31,6 +34,8 @@ export default function Detail(props:any) {
     const [brands, setBrands] = useState<any[]>([])
     const [brandTitle, setBrandTitle] = useState('')
     const [modelText, setModelText] = useState('مدل')
+    const [editorLoaded, setEditorLoaded] = useState(false);
+    const [dataTxt, setDataTxt] = useState("")
 
     useEffect(() => {
         
@@ -50,6 +55,7 @@ export default function Detail(props:any) {
                     }else {
                         setModelText('')
                     }
+                    setEditorLoaded(true);
 
     },[route])
 
@@ -344,11 +350,11 @@ export default function Detail(props:any) {
                 </FormLabel>
                 </Grid>
 
-                <Grid xs={12} sm={12} md={122} lg={12}>
+                <Grid xs={12} sm={12} md={12} lg={12}>
                     <br/>
                 <span>شرح کالا</span>
                 <FormLabel sx={{margin:1, marginTop:3}}>
-                   <Textarea
+                   {/* <Textarea
                     sx={{
                         width:'100%'
                     }}
@@ -359,7 +365,13 @@ export default function Detail(props:any) {
                         setFormData({...formData,text:e.target.value})
                     }}  
                     />
-                    <span className="mute text-mute">{formData.text.length}/2000</span>
+                    <span className="mute text-mute">{formData.text.length}/2000</span> */}
+
+                                                <CKeditor
+                                                    editorLoaded={editorLoaded}
+                                                    value={String(formData.text)}
+                                                    onChange={(e: any) => setFormData({...formData,text:String(e)})} name={""}               
+                                                />
                 </FormLabel>
                 </Grid>
 

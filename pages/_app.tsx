@@ -3,12 +3,12 @@ import RootLayout from '@/Layouts/layout'
 import 'bootstrap/dist/css/bootstrap.css';
 import '@/globals.css'
 import React, { useEffect, useState } from 'react';
-import Lang from '@/Components/lang';
 import { useRouter } from 'next/router';
 import ConfContext from '@/Context/ConfConext';
 import ThemplateContext from '@/Context/ThemplateContext';
 import axios from 'axios';
-
+import '@/ckeditor.css'
+import '@/placeholder.css'
 interface CONF {
   title: string;
   domain: string;
@@ -46,7 +46,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           if (!localStorage.getItem('_lang_')) {
               localStorage.setItem('_lang_','EN')
           }
-          console.log(dataConf);
+          console.log('log: ',dataConf);
           
         },[router])
 

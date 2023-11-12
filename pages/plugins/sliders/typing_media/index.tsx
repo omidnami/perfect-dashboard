@@ -26,7 +26,7 @@ export default function TypingMedia() {
 
     const [newModal, setNewModal] = useState<boolean>(false)
     const [selectLang, setSelectLang] = useState<boolean>(true)
-    const [formData, setFormData] = useState<any>({})
+    const [formData, setFormData] = useState<any>({title:'', delay:''})
     const [lang, setLang] = useState<any>()
     const [file, setFile] = useState<File>()
     const [unique, setUnique] = useState<any>('')
@@ -57,20 +57,21 @@ export default function TypingMedia() {
     useEffect(() => {
       console.log(response);
       if (response?.status) {
-            if (response?.msg === 'cat_inserted') {
+            if (response?.msg === 'inserted') {
                 setNewModal(false)
                 setFormData({})
-                router.push(`/article/category/${id}/?page=1`)
-            }else if (response?.slug) {
+                router.push(`/plugins/sliders/typing_media/?page=1`)
+            }else if (response?.id) {
                 setFormData(response)
-            }else if (response?.msg === 'cat_updated') {
-                router.push(`/article/category/${id}/?page=1`)
+            }else if (response?.msg === 'updated') {
+              setNewModal(false)
+                router.push(`/plugins/sliders/typing_media/?page=${page}`)
 
-            }else if (response?.msg === 'cat_deleted') {
+            }else if (response?.msg === 'deleted') {
                 setUnique('')
                 setOpen(false)
                 setLdopen(false)
-                router.push(`/article/category/${id}/?page=${page}`)
+                router.push(`/plugins/sliders/typing_media/?page=${page}`)
 
             }
 
@@ -101,7 +102,7 @@ export default function TypingMedia() {
     const onClickNewCatHandel = () => {
         setNewModal(true)
         setSelectLang(true)
-        setFormData({}) 
+        setFormData({title:'',delay:''}) 
 
     }
 
@@ -116,7 +117,7 @@ export default function TypingMedia() {
       
 
       if (unique) {
-        await postData('article/cat/update',{...formData,unique:unique}, header)
+        await postData('plugins/slider/update',{...formData,unique:unique}, header)
       }else {
         await postData('plugins/slider/insert',formData, header)
       }
@@ -127,7 +128,7 @@ export default function TypingMedia() {
     const handleDeleteCat = () => {
       if (unique) {
         document.body.classList.add('loading')
-        postData('article/cat/delete',{unique:unique})
+        postData('plugins/slider/delete',{unique:unique})
       }
     }
 
@@ -137,7 +138,7 @@ export default function TypingMedia() {
       let header = {
         'lang': lang
       }
-      await postData(`article/cat/select`,{unique:id},header)
+      await postData(`plugins/slider/select/parent`,{unique:id},header)
 
         setUnique(id)
         setNewModal(true)
@@ -154,19 +155,19 @@ export default function TypingMedia() {
       setNewModal(false);
       setId(0)
       setUnique('')
-      setFormData({})
+      setFormData({title:'',delay:''})
       setLang(localStorage.getItem('_lang_') || '')
       setFile(undefined)
 
     }
     
     const onChangeLangHadle = async (e:any) => {
-      setFormData({title:'',canonical:'',meta_key:'',meta_description:''})
+      setFormData({title:'',delay:''})
       setLang(e)
       let header = {
         'lang': e
       }
-      await postData(`article/cat/select`,{unique:unique},header)
+      await postData(`plugins/slider/select/parent`,{unique:unique},header)
     }
 
     const delLang = (id:any) => {
@@ -177,7 +178,7 @@ export default function TypingMedia() {
     const handleDeleteLang = () => {
       if (langDeletId) {
         document.body.classList.add('loading')
-        postData('article/cat/delete_lang',{id:langDeletId})
+        postData('plugins/slider/del/lang',{id:langDeletId})
       }
     }
 
@@ -196,7 +197,7 @@ export default function TypingMedia() {
                  className="mute text-small small link">{getArticleCatParent(id, lang)}</small> :''} 
                 </h1>
                 <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
-                    <Button onClick={() => router.push('/article/category/trash')} className="danger">ذباله دان</Button>
+                    <Button onClick={() => router.push('/plugins/sliders/typing_media/trash')} className="danger">ذباله دان</Button>
                     <Button onClick={() => onClickNewCatHandel()} className="primary">ایجاد دسته</Button>
                 </div>
                 <div style={{clear:'both'}}></div>

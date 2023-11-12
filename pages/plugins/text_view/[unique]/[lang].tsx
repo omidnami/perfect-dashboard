@@ -9,7 +9,9 @@ import { Toolbar, Tooltip } from "@mui/material";
 import { randomUUID } from "crypto";
 import { Router, useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { GrTrash } from "react-icons/gr";
+import dynamic from 'next/dynamic';
+const CKeditor = dynamic(() => import("@/Components/editor/CkEditor"), { ssr: false });
+
 const serverData = {
     title:'',
     link:'',
@@ -32,6 +34,9 @@ export default function TextView() {
     const [mobile, setMobile] = useState<File>()
     const [fileLoadMobil, setFileLoadMobile] = useState<string>()
     const [area, setArea] = useState<boolean>(true)
+    const [editCode, setEditCode] = useState('')
+    const [editorLoaded, setEditorLoaded] = useState<boolean>(false)
+
 
     const [text, setText] = useState('')
 
@@ -45,6 +50,7 @@ export default function TextView() {
             'lang': router.query.lang
           }
         postData('plugins/text_view/select',{unique:router.query.unique},header)
+        setEditorLoaded(true)
     }, [router])
 
     useEffect(() => {
@@ -60,6 +66,7 @@ export default function TextView() {
         if (response?.status && response?.msg === 'selected') {
             setFormData(response.data)
             setText(response.art.text)
+            setEditCode(response.art.editor)
             if (response.data.id) {
                 setSelectLang(false)
             }          
@@ -71,6 +78,7 @@ export default function TextView() {
         const onChangeLangHadle = async (e:any) => {
             setFormData(serverData)
             setText('')
+            setEditCode('')
             setDynamic([])
             setFileLoad(undefined)
             setFileLoadMobile(undefined)
@@ -84,7 +92,7 @@ export default function TextView() {
               'lang': lang
             }
             
-            const data = {...formData,text:text}
+            const data = {...formData,text:text,editor:editCode}
             if (unique && unique !== 'insert' && !selectLang) {
                 await postData('plugins/text_view/update',{...data,unique:unique}, header)
             }else {
@@ -103,7 +111,7 @@ export default function TextView() {
         <Menu />
         <Container>
             <Header />
-            <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'60%',float:'right'}}>{!selectLang?'ویرایش تولید کننده':'ایجاد تولید کننده'}</h1>
+            <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'60%',float:'right'}}>{!selectLang?'ویرایش ابزارک':'ایجاد ابزارک'}</h1>
             <div style={{marginTop:'25px',marginBottom:'25px',width:'40%',float:'left'}}>
                     <Lang style={{
                             width:'100%',
@@ -169,6 +177,16 @@ export default function TextView() {
                                         <Option value='blank'>همین پنجره</Option>
                                     </Select>
                                 </FormLabel>
+                            </Grid>
+                            <Grid xs={12}>
+                                                                         {/* نمایش ادیتور */}
+                                            <FormLabel>ادیتور</FormLabel>
+                                            <CKeditor 
+                                            editorLoaded={editorLoaded}
+                                            value={editCode}
+                                            onChange={(e: any) => setEditCode(e)} 
+                                            name={""} 
+                                            />
                             </Grid>
                             <Grid xs={12}>
                                 <div style={{width:'60%',float:'right',textAlign:'right'}}>

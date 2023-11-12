@@ -48,7 +48,7 @@ export default function List() {
             const header = {
                 'lang': localStorage.getItem('_lang_')
               }
-            postData(`brand/select/?page=${page}`,null,header)
+            postData(`article/blog/select/?page=${page}`,null,header)
           }
           document.body.classList.remove('loading')
     }, [response])
@@ -63,15 +63,8 @@ export default function List() {
     const handleDeleteCat = () => {
         if (unique) {
             document.body.classList.add('loading')
-            postData('brand/delete',{unique:unique})
+            postData('article/blog/delete',{unique:unique})
           }
-    }
-    const deleteItem = (id:string) => {
-
-    }
-
-    const onChangeLangHadle = async (e:any) => {
-        setLang(e)
     }
 
     const onClickDeleteHandel = (e:any) => {
@@ -94,7 +87,7 @@ export default function List() {
     const handleDeleteLang = () => {
       if (langDeletId) {
         document.body.classList.add('loading')
-        postData('brand/delete_lang',{id:langDeletId})
+        postData('article/blog/delete_lang',{id:langDeletId})
       }
     }
 
@@ -103,9 +96,9 @@ export default function List() {
             <Menu />
             <Container>
                 <Header />
-                <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}>تولید کنندگان</h1>
+                <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}> مقالات</h1>
                 <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
-                    <Button onClick={() => router.push('/bussiness/manufacturer/trash')} className="danger">ذباله دان</Button>
+                    <Button onClick={() => router.push('/article/blog/trash')} className="danger">ذباله دان</Button>
                     <Button onClick={() => router.push('/article/blog/insert/'+lang)} className="primary">ایجاد مقاله</Button>
                 </div>
                 <div style={{clear:'both'}}></div>
@@ -163,14 +156,14 @@ export default function List() {
             level="h2"
             startDecorator={<RiFileWarningFill />}
           >
-             ({`ID: ${unique}`})  حذف تولید کننده
+             ({`ID: ${unique}`})  حذف مقاله
           </Typography>
           
           <Typography component='h3' id="alert-dialog-modal-description" textColor="text.tertiary">
             جهت ادامه روند حذف روی دکمه تایید کلیک نمایید
           </Typography>
           <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
-            با حذف تولید کننده امکان غیر فعال شدن تمامی محتوا وابسته به این مورد وجود دارد.
+            با حذف مقاله امکان غیر فعال شدن تمامی محتوا وابسته به این مورد وجود دارد.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
             <Button variant="plain" color="neutral" onClick={() => setOpen(false)}>

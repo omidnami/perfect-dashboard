@@ -58,20 +58,13 @@ export default function TextView() {
     useEffect(() => {
       console.log(response);
       if (response?.status) {
-            if (response?.msg === 'cat_inserted') {
-                setNewModal(false)
-                setFormData({})
-                router.push(`/article/category/${id}/?page=1`)
-            }else if (response?.slug) {
+            if (response?.slug) {
                 setFormData(response)
-            }else if (response?.msg === 'cat_updated') {
-                router.push(`/article/category/${id}/?page=1`)
-
-            }else if (response?.msg === 'cat_deleted') {
+            }else if (response?.msg === 'deleted') {
                 setUnique('')
                 setOpen(false)
                 setLdopen(false)
-                router.push(`/article/category/${id}/?page=${page}`)
+                router.push(`/plugins/text_view/?page=${page}`)
 
             }
 
@@ -83,15 +76,6 @@ export default function TextView() {
      
       document.body.classList.remove('loading')
     }, [response])
-
-
-    useEffect(() => {
-
-    }, [lang])
-
-  
-    
-    
     
     //action
     
@@ -99,36 +83,13 @@ export default function TextView() {
         setPage(v)      
     }
 
-    const onClickNewCatHandel = () => {
-        setNewModal(true)
-        setSelectLang(true)
-        setFormData({}) 
 
-    }
-
-    const handleNewCatSubmit = async () => {
-      document.body.classList.add('loading')
-
-      let header = {
-        'Content-Type': 'multipart/form-data',
-        'lang': lang
-      }
-      
-      
-
-      if (unique) {
-        await postData('article/cat/update',{...formData,unique:unique}, header)
-      }else {
-        await postData('plugins/slider/insert',formData, header)
-      }
-      
-    }
-
-  
     const handleDeleteCat = () => {
+      setData({data:[],total:0,per_page:10,current_page:1})
+
       if (unique) {
         document.body.classList.add('loading')
-        postData('article/cat/delete',{unique:unique})
+        postData('plugins/text_view/delete',{unique:unique})
       }
     }
 
@@ -143,35 +104,16 @@ export default function TextView() {
         setOpen(true)
     }
 
-
-    const handleCloseEditModal = () => {
-      setNewModal(false);
-      setId(0)
-      setUnique('')
-      setFormData({})
-      setLang(localStorage.getItem('_lang_') || '')
-      setFile(undefined)
-
-    }
-    
-    const onChangeLangHadle = async (e:any) => {
-      setFormData({title:'',canonical:'',meta_key:'',meta_description:''})
-      setLang(e)
-      let header = {
-        'lang': e
-      }
-      await postData(`article/cat/select`,{unique:unique},header)
-    }
-
     const delLang = (id:any) => {
       setLangDeletId(id)
       setLdopen(true)
     }
 
     const handleDeleteLang = () => {
+      setData({data:[],total:0,per_page:10,current_page:1})
       if (langDeletId) {
         document.body.classList.add('loading')
-        postData('article/cat/delete_lang',{id:langDeletId})
+        postData('plugins/text_view/del/lang',{id:langDeletId})
       }
     }
 
@@ -190,13 +132,13 @@ export default function TextView() {
                  className="mute text-small small link">{getArticleCatParent(id, lang)}</small> :''} 
                 </h1>
                 <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
-                    <Button onClick={() => router.push('/article/category/trash')} className="danger">ذباله دان</Button>
+                    <Button onClick={() => router.push('/plugins/text_view/trash')} className="danger">ذباله دان</Button>
                     <Button onClick={() => router.push('/plugins/text_view/insert/'+lang)} className="primary">ایجاد ابزارک</Button>
                 </div>
                 <div style={{clear:'both'}}></div>
 
                 {
-          !data?
+          !data.data.length?
                 <CircularProgress sx={{textAlign:'center',margin:'48%',marginTop:'40px'}} disableShrink />
             :
             data?.data.map((item:any) => {
@@ -249,97 +191,21 @@ export default function TextView() {
             level="h2"
             startDecorator={<RiFileWarningFill />}
           >
-             ({`ID: ${unique}`}) حذف دسته
+             ({`ID: ${unique}`}) حذف ابزارک
           </Typography>
           
           <Typography component='h3' id="alert-dialog-modal-description" textColor="text.tertiary">
             جهت ادامه روند حذف روی دکمه تایید کلیک نمایید
           </Typography>
-          <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
+          {/* <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
             با حذف دسته، امکان غیر فعال شدن تمامی زیر دسته های مرتبط و همچنان تمام محتوا وابسته به این مورد وجود دارد.
-          </Typography>
+          </Typography> */}
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
             <Button variant="plain" color="neutral" onClick={() => setOpen(false)}>
               انصراف
             </Button>
             <Button variant="solid" color="danger" onClick={() => handleDeleteCat()}>
               تایید 
-            </Button>
-          </Box>
-        </ModalDialog>
-   </Modal>
-
-   <Modal open={newModal}
-     onClose={() => handleCloseEditModal()}
-    >
-        <ModalDialog
-          variant="outlined"
-          role="alertdialog"
-          aria-labelledby="alert-dialog-modal-title"
-          aria-describedby="alert-dialog-modal-description"
-          sx={{width:'95%',maxWidth:'600px'}}
-          className="modal-omid"
-        >
-        <Lang style={{
-                    float:'left',
-                    width:'30%',
-                    position:'absolute',
-                    left:7,
-                    top:7
-                }}
-                disable={selectLang}
-                onChange={(e:any) => onChangeLangHadle(e)}
-                dv={lang}
-        />
-          <Typography
-            id="alert-dialog-modal-title"
-            level="h2"
-            startDecorator={<RiFileWarningFill />}
-            sx={{float:'right',width:'70%'}}
-          >
-          ایجاد اسلایدر
-
-          </Typography>
-          <Divider />
-          <Grid container spacing={1.5}>
-                            <Grid lg={6} sm={12}>
-                                <FormLabel>
-                                    <span>عنوان<small className="text-danger pr-1">*</small></span> 
-                                <Input
-                                    size={'lg'}
-                                    startDecorator={<AiOutlineFontSize />}
-                                    fullWidth
-                                    required
-                                    value={formData?.title}
-                                    onChange={(e) => setFormData({...formData,title:e.target.value})}
-                                    id="fname"
-                                />
-                               {response?.errors?.title&&<span className="err">{response?.errors?.title}</span>}
-                                </FormLabel>
-                            </Grid>
-
-                            <Grid lg={6} sm={12}>
-                                <FormLabel>
-                                    <span>وقفه زمانی(ms)</span> 
-                                <Input
-                                    size={'lg'}
-                                    startDecorator={<AiOutlineFieldTime/>}
-                                    fullWidth
-                                    type="number"
-                                    value={formData?.delay}
-                                    onChange={(e) => setFormData({...formData,delay:e.target.value})}
-                                />
-                                {response?.errors?.delay&&<span className="err">{response?.errors?.delay}</span>}
-                                </FormLabel>
-                            </Grid>
-                        </Grid>
-
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
-            <Button variant="plain" color="neutral" onClick={() => setNewModal(false)}>
-              انصراف
-            </Button>
-            <Button variant="solid" color="danger" onClick={() => handleNewCatSubmit()}>
-              ثبت اطلاعات 
             </Button>
           </Box>
         </ModalDialog>

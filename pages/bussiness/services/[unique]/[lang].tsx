@@ -8,6 +8,12 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
+const serverData = {
+    title:'',
+    link:'',
+    cat:null,
+    data:null,
+}
 
 const page_title = ' خدمات'
 export default function Store() {
@@ -25,9 +31,11 @@ export default function Store() {
     const [typing, setTyping] = useState<boolean>(false)
 
     useEffect(() => {
+
         if (!lang) {
             setLang(localStorage.getItem('_lang_'))
         }
+        setUnique(String(router.query.unique))
         server()
 
     }, [router])
@@ -37,8 +45,17 @@ export default function Store() {
         if (response?.status && response?.msg === 'service_inserted') {
             router.push('/bussiness/services/')
         }
+        if (response?.status && response?.id) {
 
+            setData(JSON.parse(response.data))
+            setFormData(response)
+            if (response.url) {
+                setFileLoad(process.env.NEXT_PUBLIC_UPLOAD_PATH+response.url)
+            }
+            setSelectLang(false)
+        }
         document.body.classList.remove('loading')
+
     }, [response])
 
 
@@ -48,13 +65,18 @@ export default function Store() {
         const header = {
             'lang': router.query.lang
           }
-        await postData('service/select', {unique:unique},header)
+        await postData('service/select', {unique:String(router.query.unique)},header)
+        document.body.classList.remove('loading')
     }
 
     const onChangeLangHadle = (e:any) => {
+
+        setData({max_price:0,min_price:0,completed:0,serviceing:0,vahed:'تومان'})
+        setFormData(serverData)
+        setFileLoad('')
+        setLang(e)
         router.push(`/bussiness/services/${unique}/${e}`)
 
-        setLang(e)
     }
 
     const onSubmitHandle = async () => {

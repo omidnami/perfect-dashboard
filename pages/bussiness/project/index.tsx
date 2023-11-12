@@ -1,6 +1,6 @@
 import Header from "@/Components/header";
 import Category from "@/Components/listItem/categury";
-import Manufacturer from "@/Components/listItem/manufactur";
+import ProjectList from "@/Components/listItem/project";
 import Menu from "@/Components/menu";
 import useFetch from "@/Hooks/useFetch";
 import Container from "@/Layouts/Continer";
@@ -107,8 +107,8 @@ export default function Project() {
                 <Header />
                 <h1 style={{marginTop:'25px',marginBottom:'25px',maxWidth:'65%',float:'right'}}>پروژه ها</h1>
                 <div style={{marginTop:'25px',marginBottom:'25px',maxWidth:'40%',float:'left'}}>
-                    <Button onClick={() => router.push('/project/manufacturer/trash')} className="danger">ذباله دان</Button>
-                    <Button onClick={() => router.push('/project/manufacturer/insert/'+lang)} className="primary">ایجاد پروژه</Button>
+                    <Button onClick={() => router.push('/bussiness/project/trash')} className="danger">ذباله دان</Button>
+                    <Button onClick={() => router.push('/bussiness/project/insert/'+lang)} className="primary">ایجاد پروژه</Button>
                 </div>
                 <div style={{clear:'both'}}></div>
         {
@@ -118,11 +118,11 @@ export default function Project() {
                     data?.data.map((item:any) => {
                   return (
             <>
-                <Manufacturer 
+                <ProjectList 
                   title={item.title}
                   id={item.id}
                   uniqueId={item.uniqueId}
-                  edithandle={(e:any) => router.push('/bussiness/manufacturer/'+item.uniqueId+'/fa')}
+                  edithandle={(e:any) => router.push('/bussiness/project/'+item.uniqueId+'/fa')}
                   deletehandle={(e:any) => onClickDeleteHandel(e)}
                   delIcon={<RiDeleteBin6Line />}
                   delTool='حذف'
@@ -165,14 +165,14 @@ export default function Project() {
             level="h2"
             startDecorator={<RiFileWarningFill />}
           >
-             ({`ID: ${unique}`})  حذف تولید کننده
+             ({`ID: ${unique}`})  حذف پروژه
           </Typography>
           
           <Typography component='h3' id="alert-dialog-modal-description" textColor="text.tertiary">
             جهت ادامه روند حذف روی دکمه تایید کلیک نمایید
           </Typography>
           <Typography className="text-danger" id="alert-dialog-modal-description" textColor="text.tertiary">
-            با حذف تولید کننده امکان غیر فعال شدن تمامی محتوا وابسته به این مورد وجود دارد.
+            با حذف پروژه امکان غیر فعال شدن تمامی محتوا وابسته به این مورد وجود دارد.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
             <Button variant="plain" color="neutral" onClick={() => setOpen(false)}>

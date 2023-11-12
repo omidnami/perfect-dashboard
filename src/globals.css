@@ -495,3 +495,20 @@ header .wallet div{
  ul li ul li div span div span, ul li ul li div div span {
   color: gray !important;
  }
+ .MuiTypography-title-sm{
+  color: gray !important;
+ }
+
+ /* .ck.ck-editor {
+  position: relative;
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.ck ck-powered-by{
+  display: none;
+} */
+
+.ck-rounded-corners .ck.ck-editor__main>.ck-editor__editable, .ck.ck-editor__main>.ck-editor__editable.ck-rounded-corners {
+  min-height: 300px;
+}

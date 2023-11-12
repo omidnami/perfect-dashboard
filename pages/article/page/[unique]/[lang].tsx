@@ -4,13 +4,13 @@ import Lang from "@/Components/lang";
 import Menu from "@/Components/menu";
 import useFetch from "@/Hooks/useFetch";
 import Container from "@/Layouts/Continer";
-import { AspectRatio, Avatar, Box, Button, Card, Checkbox, Chip, Divider, FormLabel, Grid, Input, ListDivider, ListItemDecorator, Modal, ModalDialog, Option, Radio, Select, Textarea, Typography } from "@mui/joy";
+import { AspectRatio, Avatar, Box, Button, Card, Checkbox, Chip, Divider, FormLabel, Grid, IconButton, Input, ListDivider, ListItemDecorator, Modal, ModalDialog, Option, Radio, Select, Textarea, Typography } from "@mui/joy";
 import { List as ListItem } from "@mui/joy";
 import { useRouter } from "next/router";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AiFillPlusCircle, AiOutlineFontSize, AiOutlineLink, AiOutlineSearch } from "react-icons/ai";
 
-import { HiCalendar, HiCreditCard, HiDevicePhoneMobile, HiDocumentText, HiEnvelope, HiFlag, HiGlobeAlt, HiKey, HiMap, HiPencil, HiPhone, HiTrash, HiUser } from "react-icons/hi2";
+import { HiCalendar, HiComputerDesktop, HiCreditCard, HiDevicePhoneMobile, HiDocumentText, HiEnvelope, HiFlag, HiGlobeAlt, HiKey, HiMap, HiPencil, HiPhone, HiTrash, HiUser } from "react-icons/hi2";
 import { ifError } from "assert";
 import TagMaker from "@/Components/tagMaker";
 import { GrAdd, GrClose } from "react-icons/gr";
@@ -22,7 +22,11 @@ import ThemplateContext from "@/Context/ThemplateContext";
 import CodeJavascript from "@/Components/code/javascript";
 import CodeHtml from "@/Components/code/html";
 import CodeLess from "@/Components/code/css";
-
+import { TfiMobile } from "react-icons/tfi";
+import { BiMobileAlt, BiMobileLandscape } from "react-icons/bi";
+import { FaTabletAlt } from "react-icons/fa";
+import dynamic from 'next/dynamic';
+const CKeditor = dynamic(() => import("@/Components/editor/CkEditor"), { ssr: false });
 
 const serverData = {
     title:'',
@@ -30,6 +34,21 @@ const serverData = {
     desc:'',
     canonical:'',
     link:''
+}
+const PLUGIN = {
+    tools:'',
+    type:'',
+    grid:{xs:0, sm:0, md:12, lg:12},
+    pull:'',
+    element:'div',
+    title:'',
+    display:true,
+    id:'',
+    class:'',
+    color:'',
+    colorType:false,
+    img:'',
+    periority:1
 }
 export default function Store() {
     const conf = useContext(ConfContext)
@@ -53,9 +72,12 @@ export default function Store() {
     const [html, setHtnl] = useState<any>('')
     const [meta, setMeta] = useState<any>('')
     const [tools, setTools] = useState<any[]>([])
-    const [plugin, setPlugin] = useState<any>({type:"",pos:"",loc:1,id:0,class:'',ids:''})
+    const [plugin, setPlugin] = useState<any>(PLUGIN)
     const [selectType, setSelectType] = useState<any[]>([])
     const [options, setOptions] = useState<any>({footer:true, header:true, robot: true, home:false})
+    const [code, setCode] = useState<boolean>(false)
+    const [editorLoaded, setEditorLoaded] = useState(false);
+    const [editCode, setEditCode] = useState('')
 
     useEffect(() => {
         setUnique(router.query.unique)
@@ -63,6 +85,7 @@ export default function Store() {
 
 
         setHtnl('')
+        setEditCode('')
         setJavascript('')
         setCss('')
         setTools([])
@@ -72,6 +95,7 @@ export default function Store() {
         setTags([])
 
         server()
+        setEditorLoaded(true)
     } ,[router])
 
     useEffect(() => {
@@ -82,6 +106,7 @@ export default function Store() {
             console.log(JSON.parse(response.options));
             const opt = JSON.parse(response.options);
             setHtnl(response.text??'')
+            setEditCode(response.editor??'')
             setJavascript(JSON.parse(response.javascript)??'')
             setCss(JSON.parse(response.css)??'')
             setTools(JSON.parse(response.data)??[])
@@ -186,6 +211,7 @@ export default function Store() {
             css:css,
             meta:meta,
             data:tools,
+            text:editCode,
             options:JSON.stringify(options)
         }
 
@@ -226,6 +252,84 @@ export default function Store() {
         
     }
 
+    const handleMenu = async () => {
+        let header = { 
+            'Content-Type': 'multipart/form-data',
+            'lang': lang
+          }
+        await postData('plugins/menu',{},header)
+        console.log('on menu');
+        
+    }
+
+    const uploadHandle = async (file:File) => {
+        setTyping(true)
+        //get to upload image
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('dir', 'page_post');
+      
+            const response = await fetch(process.env.NEXT_PUBLIC_API_URL+'/api/v1/upload', {
+              method: 'POST',
+              body: formData,
+            });
+      
+            if (response.ok) {
+              
+              const imageUrl = await response.text();
+              const url = process.env.NEXT_PUBLIC_UPLOAD_PATH+JSON.parse(imageUrl).url
+              setPlugin({...plugin,img: url})
+              console.log(typeof url, url);
+              
+                setTyping(false)
+                return true
+            }else{
+              alert('تصویر بارگذاری نشد')
+              setTyping(false)
+
+            }
+          } catch (error) {
+            alert('تصویر بارگذاری نشد')
+            setTyping(false)
+
+            console.error('Image upload failed:', error);
+          }
+        //set to plugin.img.url
+    }
+
+    const addToolsHandle = () => {
+        const p = tools.length+1
+        const t = {...plugin, periority:p}
+        setTools([...tools,t])
+
+        setOpen(false)
+    }
+
+    const periorityHandle = (v:any, val:any) => {
+            const p = {...v,periority:val}
+            const t = tools.filter(e=> e !== v)
+
+    }
+
+    const pluginTostring = (v:any) => {
+        switch(Number(v)){
+            case 0:
+                return 'مخفی'
+            case 12:
+                return '1/1'
+            case 6:
+                return '1/2'
+            case 4:
+                return '1/3'
+            case 3:
+                return '1/4'
+            case 8:
+                return '2/3'
+        }
+        return 'ok'
+    }
+
     return (
     <main>
         <Menu />
@@ -251,16 +355,14 @@ export default function Store() {
                         <h3>مدیریت ابزارک ها</h3>
                         <Divider />
                         {/* "type":"slider","pos":"pos1","loc":1,"id":1 */}
+                        <p><br/></p>
+
                             <Grid container spacing={1.5}>
-                                {
-                                    template.position.map((v:any, i:any) => {
-                                       const t = tools.filter((e: { pos: any; })=> e.pos === v)
-                                       const h:number = (t.length+1) * 4
-                                        return(
-                                            <Box key={i} component='section'
+                                
+                                            <Box component='section'
                                             sx={{
                                                 border:'dashed 1px gray',
-                                                padding:h,
+                                                padding:10,
                                                 width:'100%',
                                                 borderRadius:7,
                                                 marginBottom:3,
@@ -268,99 +370,144 @@ export default function Store() {
                                                 cursor:'pointer',
                                                 position:'relative',
                                                 }}
+                                                onClick={() => setOpen(true)}
                                             >
                                                 <Box component='div'
                                                 sx={{
                                                     width:'99%',
-                                                
+                                                    fontSize:50,
                                                     position:'absolute',
-                                                    top:0,
+                                                    top:'20%',
                                                     right:0
                                                 }}
                                                 >
-                                                    {
-                                                        t.map((item, i) => {
-                                                            return (
-                                                                <Box
-                                                                key={i}
-                                                                sx={{
-                                                                    margin:.5,
-                                                                    padding:1.3,
-                                                                    backgroundColor:'rgba(0,0,0,.1)',
-                                                                    width:'100%'
-                                                                }}
-                                                                >
-                                                                <Grid container spacing={1}>
-                                                                    <Grid xs={.5}><HiTrash 
-                                                                    onClick={() => {
-                                                                        const d = tools.filter(e=> e !== item)
-                                                                        setTools(d)
-                                                                    }}
-                                                                    /></Grid>
-                                                                    <Grid xs={.5}><HiPencil /></Grid> 
-                                                                    <Grid xs={2}>{item.type}</Grid>
-                                                                    <Grid xs={7.5}>{item.id}</Grid>
-                                                                    <Grid xs={1.5}><Input type="number" size="sm" placeholder={item.loc}
-                                                                    onChange={(e) => {
-                                                                        const edit = {...item,loc:e.target.value}
-                                                                        const d = tools.filter(e=> e !== item)
-                                                                        setTools([...d,edit])
-                                                                    }}
-                                                                    /></Grid>
-                                                                </Grid>
-                                                                </Box>
-                                                            )
-                                                        })
-                                                    }
+                                                    ابزارک
                                                 </Box>
 
-                                                <Box component='div'
-                                                sx={{fontSize:30, textAlign:'center',
-                                                position:'absolute',
-                                                bottom:0
-                                                }}
-                                                onClick={() => {
-                                                    const t = tools.filter(e=> e.pos=== v)
-                                                    
-                                                    setPlugin({...plugin,pos:v,loc:t.length+1})
-                                                    setOpen(true)
-                                                    setPosition(v)
-                                                }}
-                                                >
-                                                    {v}
-                                                </Box>
                                             </Box>
-                                        )
-                                    })
-                                }
-                            <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
-                            <FormLabel>Html</FormLabel>
+                                            {
+                                                tools.map((v, i) => {
+                                                    return (
+                                                        <Box key={i} sx={{width:'100%'}}>
+                                                            <Box
+                                                            sx={{
+                                                                border:'dashed 1px gray',
+                                                                padding:1,
+                                                                borderRadius:7,
+                                                                width:'100%',
+                                                                margin:'.5%',
+                                                            }}
+                                                            >
+                                                                <h5
+                                                                style={{float:'right', textAlign:'right'}}
+                                                                >{v.tools}
+                                                                <p>{v.type}</p>
+                                                                </h5>
+                                                                <div style={{float:'left', textAlign:'left'}}>
+                                                                <span style={{margin:'6px'}}><BiMobileAlt size="large"/>{pluginTostring(v.grid.xs)}</span>
+                                                                <span style={{margin:'6px'}}><BiMobileLandscape size='large'/>{pluginTostring(v.grid.sm)}</span>
+                                                                <span style={{margin:'6px'}}><FaTabletAlt size="large"/>{pluginTostring(v.grid.md)}</span>
+                                                                <span style={{margin:'6px'}}><HiComputerDesktop size="large"/>{pluginTostring(v.grid.lg)}</span>
+                                                                </div>
+                                                                <div style={{clear:'both'}}></div>
+                                                                <Divider />
+                                                                <br/>
+                                                                    <span>عنوان: {v.title}</span>
+                                                                    <span style={{marginRight:'10px'}}>({v.display?'نمایش':'مخفی'})</span>
+                                                                    <div style={{float:'left', textAlign:'left'}}>
+                                                                        <IconButton>
+                                                                            <span style={{margin:'6px'}}><HiPencil fontSize="lg"/></span>
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                        onClick={() => {
+                                                                            const t = tools.filter(e=> e !== v)
+                                                                            setTools(t)
+                                                                        }}
+                                                                        >
+                                                                            <span style={{margin:'6px'}}><HiTrash fontSize='lg'/></span>
+                                                                        </IconButton>
+                                                                    </div>
+                                                                    <br/>
+                                                                    <p>اولویت نمایش</p>
+                                                                    <Select
+                                                                    value={v.periority}
+                                                                    sx={{width:'40%'}}
+                                                                    >
+                                                                        {
+                                                                            [...Array(tools.length)].map((_, index) => {
+                                                                                return (
+                                                                                    <Option key={index} value={index+1}>{index+1}</Option>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </Select>
+                                                                <div style={{clear:'both'}}></div>
+                                                            </Box>
+                                                        </Box>
+                                                    )
+                                                })
+                                            }
+                                        
 
-                                <CodeHtml value={(e:any) => setHtnl(e)} 
-                                defaultValue={html}
-                                />
-                            </Grid>
-                            <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
-                                <FormLabel>Less (css)</FormLabel>
-                                <CodeLess value={(e:any) => setCss(e)} 
-                                defaultValue={css}
-                                />
-                            </Grid>
+                                            <Grid xs={12}>
+<br/>
 
-                            <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
-                            <FormLabel>Javascript</FormLabel>
+                                            {/* نمایش ادیتور */}
+                                            <FormLabel>ادیتور</FormLabel>
+                                            <CKeditor 
+                                            editorLoaded={editorLoaded}
+                                            value={String(editCode)}
+                                            onChange={(e: any) => setEditCode(e)} 
+                                            name={""} 
+                                            />
+                                            </Grid>
 
-                                <CodeJavascript value={(e:any) => setJavascript(e)} 
-                                defaultValue={javascript}
-                                />
-                            </Grid>
+                                        <Button sx={{background:'none'}}
+                                        onClick={() => {
+                                            setCode(!code)
+                                        }}
+                                        >
+                                            {
+                                                code?'مخفی سازی کد':'نمایش کد'
+                                            }
+                                        </Button>
+                                
+                                                <br/>
+                                   {
 
-                            <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
-                            <FormLabel>Meta</FormLabel>
-                                <CodeHtml value={(e:any) => setMeta(e)} 
-                                defaultValue={meta}
-                                />
-                            </Grid>
+                                    code&&
+                                    <>
+                                    <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
+                                    <FormLabel>Html</FormLabel>
+
+                                        <CodeHtml value={(e:any) => setHtnl(e)} 
+                                        defaultValue={html}
+                                        />
+                                    </Grid>
+                                    <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
+                                        <FormLabel>Less (css)</FormLabel>
+                                        <CodeLess value={(e:any) => setCss(e)} 
+                                        defaultValue={css}
+                                        />
+                                    </Grid>
+
+                                    <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
+                                    <FormLabel>Javascript</FormLabel>
+
+                                        <CodeJavascript value={(e:any) => setJavascript(e)} 
+                                        defaultValue={javascript}
+                                        />
+                                    </Grid>
+
+                                    <Grid xs={12} sx={{direction:'ltr', textAlign:'left'}}>
+                                    <FormLabel>Meta</FormLabel>
+                                        <CodeHtml value={(e:any) => setMeta(e)} 
+                                        defaultValue={meta}
+                                        />
+                                    </Grid>
+                                    </>
+                                   } 
+
                             </Grid>
                     </Card>
 
@@ -499,120 +646,710 @@ export default function Store() {
             onClose={() => {
                 setOpen(false)
                 setPosition('')
-                setPlugin({type:"",pos:"",loc:1,id:0,class:'',ids:''})
+                setPlugin(PLUGIN)
             }}
             >
             <ModalDialog
             className={'modal-omid'}
-            sx={{width:'100%', maxWidth:'660px'}}
+            sx={{width:'100%', maxWidth:'660px', maxHeight:'700px',overflow:'auto'}}
             >
-                موقعیت {position}
                 <br />
                 <Divider />
                 <br />
                 {/* "type":"slider","pos":"pos1","loc":1,"id":1 */}
-                <FormLabel>
-                    <span>ابزارک</span>
-                    <Select 
-                    size='lg'
-                    sx={{width:'100%'}}
-                    onChange={(e, s) => {
-                        setSelectType([])
-                        switch(s){
-                        case"product":
-                            setSelectType(template.product_plugins || [])
-                            break;
-                        case"one_product":
-                            handleProduct()
-                            break;
-                        case"service":
-                            setSelectType(template.service_plugins || [])
-                            break;
-                        case"paralax":
-                            setSelectType([])
-                            break;
-                        case"blog":
-                            setSelectType(template.blog_plugins || [])
-                            break;
-                        case"text":
-                        //to database
-                            handleText()
-                            break;
-                        case"slider":
-                        // to database
-                            handleSlider()
-                            break;
-                        case"project":
-                            setSelectType(template.project_plugins || [])
-                            break;
-                        default:
-                            setSelectType([])
-                        }
-                        setPlugin({...plugin,type:s})
-                    }}
-                    value={plugin.type}
-                    >
-                        <Option value="">انتخاب یک ابزارک</Option>
-                        {
-                            template.plugins.map((v:string, i:number) => {
-                                let title = ''
-                                switch(v){
+                <Grid container spacing={1.5}>
+                    <Grid xs={12} sm={12} md={6} lg={6}>
+                            <FormLabel>
+                                <span>ابزارک</span>
+                                <Select 
+                                size='lg'
+                                sx={{width:'100%'}}
+                                onChange={(e, s) => {
+                                    setSelectType([])
+                                    switch(s){
                                     case"product":
-                                        title = 'نمایش کالا';
+                                        setSelectType(template.product_plugins || [])
                                         break;
                                     case"one_product":
-                                        title = 'کالا تکی';
+                                        handleProduct()
                                         break;
                                     case"service":
-                                    title = 'نمایش خدمات';
+                                        setSelectType(template.service_plugins || [])
                                         break;
                                     case"paralax":
-                                    title = 'پارالاکس';
+                                        setSelectType([])
                                         break;
                                     case"blog":
-                                    title = 'نمایش مقاله';
+                                        setSelectType(template.blog_plugins || [])
                                         break;
                                     case"text":
-                                    title = ' نمایش متن (کد)';
+                                    //to database
+                                        handleText()
                                         break;
+                                    case"menu":
+                                        //to database
+                                            handleMenu()
+                                            break;
                                     case"slider":
-                                    title = 'اسلایدر';
+                                    // to database
+                                        handleSlider()
                                         break;
                                     case"project":
-                                    title = 'نمایش نمونه کار';
+                                        setSelectType(template.project_plugins || [])
                                         break;
-                                    
-                                }
-                                return (
-                                    <Option key={i} value={v}>{title}</Option>
-                                )
-                            })
-                        }
-                    </Select>
-                    
-                </FormLabel>
-                    <br />
-                <FormLabel>
-                    <span>ابزارک</span>
-                    <Select 
-                    size='lg'
-                    sx={{width:'100%'}}
-                    value={plugin.id}
-                    onChange={(e, v) => setPlugin({...plugin,id:v})}
-                    >
-                        <Option value="">انتخاب یک ابزارک</Option>
-                        {
-                            selectType.map((v:any, i:any) => {
+                                    default:
+                                        setSelectType([])
+                                    }
+                                    setPlugin({...plugin,tools:s})
+                                    setPlugin({...plugin,tools:s})
+                                }}
+                                value={plugin.tools}
+                                >
+                                    <Option value="">انتخاب یک ابزارک</Option>
+                                    {
+                                        template.plugins.map((v:string, i:number) => {
+                                            let title = ''
+                                            switch(v){
+                                                case"product":
+                                                    title = 'نمایش کالا';
+                                                    break;
+                                                case"one_product":
+                                                    title = 'کالا تکی';
+                                                    break;
+                                                case"service":
+                                                title = 'نمایش خدمات';
+                                                    break;
+                                                case"paralax":
+                                                title = 'پارالاکس';
+                                                    break;
+                                                case"blog":
+                                                title = 'نمایش مقاله';
+                                                    break;
+                                                case"text":
+                                                title = ' نمایش متن (کد)';
+                                                    break;
+                                                case"slider":
+                                                title = 'اسلایدر';
+                                                    break;
+                                                case"project":
+                                                title = 'نمایش نمونه کار';
+                                                    break;
+                                                case"menu":
+                                                    title = 'نمایش منو';
+                                                        break;
+                                            }
+                                            return (
+                                                <Option key={i} value={v}>{title}</Option>
+                                            )
+                                        })
+                                    }
+                                </Select>
                                 
-                                return(
-                                    <Option key={i} value={typeof v === "object"?v.id:v}>{typeof v === "object"?v.title:v}</Option>
-                                )
-                            })
+                            </FormLabel>
+                    </Grid>
+                    <Grid xs={12} sm={12} md={6} lg={6}>
+                        <FormLabel>
+                            <span><br/></span>
+                            <Select 
+                            size='lg'
+                            sx={{width:'100%'}}
+                            value={plugin.type}
+                            onChange={(e, v) => setPlugin({...plugin,type:v})}
+                            >
+                                <Option value="">انتخاب یک ابزارک</Option>
+                                {
+                                    selectType.map((v:any, i:any) => {
+                                        
+                                        return(
+                                            <Option key={i} value={typeof v === "object"?v.id:v}>{typeof v === "object"?v.title:v}</Option>
+                                        )
+                                    })
+                                }
+                            </Select>
+                            
+                        </FormLabel>
+                    </Grid>
+                </Grid>
+                    <p><br/></p>
+                    <label>موبایل عمودی</label>
+                    <Grid container spacing={1}>
+                        <Grid xs={2}>
+                            <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.xs===0?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,xs:0}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    مخفی
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.xs===12?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,xs:12}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/1
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.xs===6?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,xs:6}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/2
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.xs===4?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,xs:4}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/3
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.xs===3?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,xs:3}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/4
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.xs===8?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,xs:8}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    2/3
+                            </Button>
+                        </Grid>
+                    </Grid>
+                    <p><br/></p>
+                    <label>موبایل افقی</label>
+                    <Grid container spacing={1}>
+                        <Grid xs={2}>
+                            <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.sm===0?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,sm:0}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    مخفی
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.sm===12?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,sm:12}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/1
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.sm===6?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,sm:6}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/2
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.sm===4?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,sm:4}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/3
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.sm===3?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,sm:3}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/4
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.sm===8?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,sm:8}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    2/3
+                            </Button>
+                        </Grid>
+                    </Grid>
+                    <p><br/></p>
+                    <label>تبلت</label>
+                    <Grid container spacing={1}>
+                        <Grid xs={2}>
+                            <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.md===0?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,md:0}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    مخفی
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.md===12?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,md:12}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/1
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.md===6?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,md:6}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/2
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.md===4?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,md:4}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/3
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.md===3?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,md:3}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/4
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.md===8?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,md:8}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    2/3
+                            </Button>
+                        </Grid>
+                    </Grid>
+                    <p><br/></p>
+                    <label>دسکتاپ</label>
+                    <Grid container spacing={1}>
+                        <Grid xs={2}>
+                            <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.lg===0?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,lg:0}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    مخفی
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.lg===12?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,lg:12}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/1
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.lg===6?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,lg:6}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/2
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.lg===4?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,lg:4}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/3
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.lg===3?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,lg:3}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    1/4
+                            </Button>
+                        </Grid>
+                        <Grid xs={2}>
+                        <Button
+                            sx={{
+                                border:'1px dashed gray',
+                                padding:.3,
+                                textAlign:'center',
+                                cursor:'pointer',
+                                background:plugin.grid.lg===8?'gray':'none',
+                                width:'100%'
+                            }}
+                            onClick={() => {
+                                const d = {...plugin.grid,lg:8}
+                                setPlugin({...plugin,grid:d})
+                            }}
+                            >
+                                    2/3
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                    <p><br/></p>
+
+<Grid container spacing={1.5}>
+    <Grid xs={12} sm={6}>
+        <FormLabel>
+            <span>موقعیت قرارگیری</span>
+            <Select
+            sx={{width:'100%'}}
+            value={plugin.pull}
+            onChange={(e:any, v:any) => {
+                setPlugin({...plugin,pull:v})
+            }}
+            >
+                <Option value=''>بدون موقعیت</Option>
+                <Option value='left'>چپ</Option>
+                <Option value='right'>راست</Option>
+            </Select>
+        </FormLabel>
+    </Grid>
+    <Grid xs={12} sm={6}>
+        <FormLabel>
+            <span>نوع المان</span>
+            <Select
+            sx={{width:'100%'}}
+            value={plugin.element}
+            onChange={(e:any, v:any) => {
+                setPlugin({...plugin,element:v})
+            }}
+            >
+                <Option value='div'>تگ div</Option>
+                <Option value='asid'> تگ asid</Option>
+                <Option value='section'>تگ section</Option>
+            </Select>
+        </FormLabel>
+    </Grid>
+</Grid>
+<p><br/></p>
+
+<Grid container spacing={1.5}>
+    <Grid xs={12} sm={6}>
+        <FormLabel>
+            <span>عنوان ابزارک</span>
+            <Input
+            className='form-control'
+            size="lg"
+            fullWidth
+            value={plugin.title}
+            onChange={(e:any) => setPlugin({...plugin,title:e.target.value})}
+            />
+        </FormLabel>
+    </Grid>
+    <Grid xs={12} sm={6}>
+        <FormLabel>
+            <span>حالت نمایش عنوان</span>
+            <Select
+            sx={{width:'100%'}}
+            value={plugin.display}
+            onChange={(e:any, v:any) => setPlugin({...plugin,display:v})}
+            >
+                <Option value={true}>نمایش</Option>
+                <Option value={false}>مخفی</Option>
+            </Select>
+        </FormLabel>
+    </Grid>
+</Grid>
+                    <p><br/></p>
+                    <Grid container spacing={1.5}>
+                        <Grid xs={5}>
+                            <FormLabel>
+                                <Select
+                                sx={{width:'100%'}}
+                                value={plugin.colorType}
+                                onChange={(e, v) => {
+                                    if (!v) {
+                                        setPlugin({...plugin, color:''})
+                                    }
+                                    setPlugin({...plugin, colorType:v})
+                                }}
+                                >
+                                    <Option value={false}>پیشفرض سایت</Option>
+                                    <Option value={true}>انتخاب رنگ</Option>
+                                </Select>
+                            </FormLabel>
+                        </Grid>
+                        <Grid xs={2}>
+                        {
+                            plugin.colorType?
+                            <Input
+                            fullWidth
+                            value={plugin.color}
+                            onChange={(e) => setPlugin({...plugin,color:e.target.value})}
+                            type="color"/>
+                            :<Box sx={{width:'100%'}}></Box>
                         }
-                    </Select>
-                    
-                </FormLabel>
-                <br />
+                        </Grid>
+                        <Grid xs={5}>
+
+                            <FormLabel
+                            sx={{
+                                width:'100%',
+                                height:'150px',
+                                border:'1px dashed gray',
+                                backgroundColor:'none',
+                                background:'url('+plugin.img+') no-repeat',
+                                backgroundSize:'cover',
+                                color:'gray',
+                                textAlign:'center',
+                                cursor:'pointer'
+                            }}>
+                                <Input type="file" hidden
+                                onChange={(e) => {
+                                    if (e.target.files) {
+                                        setTyping(true)
+                                        uploadHandle(e.target.files[0]);
+                                    }
+                                }}
+                                />
+                                بارگذاری تصویر
+                            </FormLabel>
+                            {
+                                typing?
+                                <>
+                                درحال بارگذاری تصویر
+                                <span className="small-loading"></span>
+                                </>
+                                : ''
+                            }
+                        </Grid>
+                    </Grid>
+                    <p><br/></p>
+
                 <Grid container spacing={1.5}>
                     <Grid xs={12} sm={6}>
                         <FormLabel>
@@ -621,9 +1358,9 @@ export default function Store() {
                             className='form-control'
                             size="lg"
                             fullWidth
-                            value={plugin.ids}
+                            value={plugin.id}
                             sx={{direction:'ltr', textAlign:'left'}}
-                            onChange={(e)=>{setPlugin({...plugin,ids:e.target.value})}}
+                            onChange={(e)=>{setPlugin({...plugin,id:e.target.value})}}
                             />
                         </FormLabel>
                     </Grid>
@@ -641,16 +1378,18 @@ export default function Store() {
                         </FormLabel>
                     </Grid>
                 </Grid>
-                <br />
+                <p><br/></p>
+
                 <Button className="primaty"
                     onClick={() => {
                         // const t = tools
                         // t.push(plugin)
-                        setTools([...tools,plugin])
-                        setOpen(false)
+                    addToolsHandle()
                         
                     }}
                 >تایید</Button>
+                                    <p><br/></p>
+
             </ModalDialog>
         </Modal>
 

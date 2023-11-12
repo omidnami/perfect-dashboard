@@ -14,7 +14,7 @@ import { GrPowerReset } from "react-icons/gr";
 export default function Trash() {
     const router = useRouter()
 
-    const [data, setData] = useState<any>(null)
+    const [data, setData] = useState<any>({data:[],total:0,per_page:10,current_page:1})
     const [page, setPage] = useState(1)
     const [lang, setLang] = useState<any>()
     const [unique, setUnique] = useState('')
@@ -48,16 +48,17 @@ export default function Trash() {
               }
             postData(`brand/select/0?page=${page}`,null,header)
           }
+          document.body.classList.remove('loading')
     }, [response])
 
     //onLoad data
     useEffect(() => {
-        document.body.classList.remove('loading')
     }, [data])
     
     //actions
 
     const handleDeleteCat = () => {
+      setData({data:[],total:0,per_page:10,current_page:1})
         if (unique) {
             document.body.classList.add('loading')
             postData('brand/delete',{unique:unique})
